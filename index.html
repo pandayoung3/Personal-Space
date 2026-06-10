@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>嘉亮的空间 · 欢迎来访</title>
+<meta name="description" content="嘉亮的空间——一座属于杨嘉亮的个人美术馆。从夜色中的宏伟外立面拾级而入，沿着会转弯的展线穿过序厅、履历馆、成长馆、学习馆与回声厅，十三幅作品挂在馆墙上等你走近。">
+<style>
+
+/* ============================================================
+   嘉亮的空间 — 滚动穿越的 3D 个人空间 V5
+   外立面入口 · 传送带走廊（高性能） · 折叠式近观
+   ============================================================ */
+:root{
+  --ink:       #161614;
+  --paper:     #f0eee9;
+  --topbar-h:  58px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#0c0c0c}
+body{
+  font-family:"Songti SC","Noto Serif SC","Source Han Serif SC",Georgia,serif;
+  background:#0c0c0c;color:#ecece8;line-height:1.75;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;cursor:pointer;color:inherit;background:none;border:none}
+a{color:inherit}
+img{max-width:100%;display:block}
+.visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip-link{position:fixed;left:8px;top:-48px;z-index:300;background:#fff;color:#000;padding:.5em 1em;transition:top .2s}
+.skip-link:focus{top:8px}
+
+/* ---------- 无 JS 降级 ---------- */
+.no-js #app{display:none}
+.fallback{max-width:46rem;margin:0 auto;padding:3rem 1.4rem;color:#e4e4de}
+.fallback h1{font-size:2rem;margin-bottom:.4rem}
+.fallback h2{margin:2.4rem 0 .8rem;border-bottom:1px solid #3a3a36;padding-bottom:.3rem;color:#cfcfc8}
+.fallback h3{margin:1.4rem 0 .3rem}
+.fallback p,.fallback li{color:#b9b9b1}
+.fallback ul{padding-left:1.4rem}
+.fallback .note{font-style:italic;color:#84847d}
+.fallback a{color:#e4e4de}
+
+/* ============================================================
+   顶栏：随房间明暗自动换装
+   ============================================================ */
+.topbar{
+  --fg:#ffffff; --mut:#9b9b94; --ln:rgba(255,255,255,.22); --invfg:#000;
+  position:fixed;top:0;left:0;right:0;height:var(--topbar-h);z-index:120;
+  display:flex;align-items:center;gap:1.2rem;padding:0 clamp(.8rem,2.5vw,2rem);
+  background:linear-gradient(to bottom,rgba(10,10,10,.9),rgba(10,10,10,.5) 70%,transparent);
+  transition:background .6s;
+}
+html[data-room="light"] .topbar{
+  --fg:#141412; --mut:#6a6a63; --ln:rgba(0,0,0,.28); --invfg:#fff;
+  background:linear-gradient(to bottom,rgba(238,236,231,.94),rgba(238,236,231,.55) 70%,transparent);
+}
+.brand{font-size:.95rem;letter-spacing:.2em;white-space:nowrap;color:var(--fg);transition:color .6s}
+.brand i{font-style:normal;color:var(--mut);margin-left:.6em;font-size:.7rem;letter-spacing:.22em;transition:color .6s}
+.halls{display:flex;gap:clamp(.2rem,1.4vw,1rem);margin:0 auto}
+.halls button{
+  position:relative;padding:.4em .55em;font-size:.84rem;letter-spacing:.18em;color:var(--mut);
+  transition:color .3s;white-space:nowrap;
+}
+.halls button::after{
+  content:"";position:absolute;left:.55em;right:.55em;bottom:.1em;height:1px;
+  background:var(--fg);transform:scaleX(0);transform-origin:left;transition:transform .3s,background .6s;
+}
+.halls button:hover,.halls button:focus-visible{color:var(--fg)}
+.halls button[aria-current="true"]{color:var(--fg)}
+.halls button[aria-current="true"]::after{transform:scaleX(1)}
+.topbar-right{display:flex;align-items:center;gap:.9rem;white-space:nowrap}
+.topbar-right .count{font-size:.78rem;color:var(--mut);font-variant-numeric:tabular-nums;letter-spacing:.12em;transition:color .6s}
+.btn-line{
+  font-size:.76rem;letter-spacing:.18em;color:var(--mut);
+  border:1px solid var(--ln);border-radius:999px;padding:.32em 1em;
+  transition:color .3s,border-color .3s,background .3s;
+}
+.btn-line:hover,.btn-line:focus-visible{color:var(--invfg);background:var(--fg);border-color:var(--fg)}
+.btn-line[aria-pressed="true"]{color:var(--fg);border-color:var(--fg)}
+/* 进度条：用主题色，不再用 mix-blend-mode（性能） */
+.progress{position:fixed;top:var(--topbar-h);left:0;right:0;height:2px;z-index:120}
+#progress-bar{height:100%;width:0;background:#fff;transition:background .6s}
+html[data-room="light"] #progress-bar{background:#141412}
+
+/* ============================================================
+   3D 视口、走廊几何体（传送带式短平面）
+   ============================================================ */
+.viewport{
+  position:fixed;inset:0;overflow:hidden;z-index:1;
+  perspective:1250px;perspective-origin:50% 47%;
+  background:#101216; /* 初始：馆外夜色，由 JS 随空间插值 */
+}
+.viewport::after{ /* 轻微暗角，聚拢视线 */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(125% 125% at 50% 46%,transparent 58%,rgba(0,0,0,.22));
+}
+.world{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform}
+.scroll-space{position:relative;z-index:0;pointer-events:none}
+
+/* 展馆几何体：按路段静态生成的地面/天花/墙体（transform 与颜色只写一次） */
+.plane{
+  position:absolute;left:50%;top:50%;pointer-events:none;
+  backface-visibility:hidden;
+}
+.plane-wallL,.plane-wallR{
+  background-image:linear-gradient(to bottom,rgba(0,0,0,.16),transparent 18% 78%,rgba(0,0,0,.22));
+}
+
+/* ============================================================
+   展位通用
+   ============================================================ */
+.exhibit{
+  position:absolute;left:50%;top:50%;width:min(1060px,94vw);
+  transform-style:preserve-3d;opacity:0;pointer-events:none;
+  backface-visibility:hidden;
+  will-change:opacity;
+}
+.exhibit.is-near{pointer-events:auto}
+.wall{
+  display:flex;align-items:center;justify-content:center;
+  gap:clamp(1.8rem,5vw,4.4rem);padding:calc(var(--topbar-h) + 1rem) clamp(.6rem,3vw,2.4rem) 1.5rem;
+}
+.exhibit::before{
+  content:"";position:absolute;left:50%;top:-12%;width:78%;height:120%;
+  transform:translateX(-50%);pointer-events:none;
+}
+.exhibit.in-dark::before{background:radial-gradient(46% 50% at 50% 32%,rgba(255,255,255,.09),transparent 70%)}
+.exhibit.in-light::before{background:radial-gradient(46% 50% at 50% 36%,rgba(0,0,0,.05),transparent 70%)}
+
+/* 远处只见画与门，走近时文字才显形 */
+.exhibit-work .panel,.exhibit-echo .panel{opacity:0;transform:translateX(14px);transition:opacity .5s ease .08s,transform .5s ease .08s}
+.exhibit-work.is-near .panel,.exhibit-echo.is-near .panel{opacity:1;transform:none}
+.painting .hint{opacity:0;transition:opacity .4s}
+.exhibit.is-near .painting .hint{opacity:1}
+
+/* ---------- 画作 ---------- */
+.painting{
+  position:relative;flex:0 0 auto;display:block;
+  width:clamp(250px,32vw,420px);aspect-ratio:4/5;padding:14px;
+  transition:border-color .3s,box-shadow .3s,transform .3s;
+}
+.in-dark .painting{
+  background:#101010;border:1px solid rgba(255,255,255,.24);
+  box-shadow:0 36px 80px -24px rgba(0,0,0,.9),0 6px 16px rgba(0,0,0,.5);
+}
+.in-dark .painting:hover,.in-dark .painting:focus-visible{
+  border-color:rgba(255,255,255,.7);
+  box-shadow:0 42px 90px -22px rgba(0,0,0,.95),0 0 36px rgba(255,255,255,.1);
+  transform:translateZ(14px);
+}
+.in-light .painting{
+  background:#181816;border:1px solid rgba(0,0,0,.55);
+  box-shadow:0 30px 60px -20px rgba(40,38,32,.5),0 4px 12px rgba(40,38,32,.25);
+}
+.in-light .painting:hover,.in-light .painting:focus-visible{
+  border-color:#000;
+  box-shadow:0 38px 70px -18px rgba(40,38,32,.55);
+  transform:translateZ(14px);
+}
+.painting:focus-visible{outline:2px solid currentColor;outline-offset:5px}
+.canvas{position:absolute;inset:14px;border:7px solid #f2f1ec;overflow:hidden;background:#1a1a1a}
+.canvas::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(110% 70% at 50% 0%,rgba(255,255,255,.15),transparent 55%),
+    repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 3px);
+}
+.cv{position:absolute;inset:0;filter:grayscale(.45) saturate(.75) contrast(.96)}
+
+/* —— 十三幅封面：纯 CSS 生成的“画作” —— */
+.cv-resume-education{background:linear-gradient(160deg,#f0e7d2 0 38%,#cfd8d3 38% 62%,#41586b 62%);}
+.cv-resume-education::before{content:"";position:absolute;inset:18% 22% 40% 22%;border:3px double #8a7a55;background:rgba(250,246,236,.7)}
+.cv-resume-timeline{background:linear-gradient(90deg,#2e3a45 0 50%,#cfae6e 50%);}
+.cv-resume-timeline::before{content:"";position:absolute;top:12%;bottom:12%;left:49%;width:2%;background:#f4ead2;box-shadow:0 0 0 4px rgba(244,234,210,.25)}
+.cv-resume-projects{background:conic-gradient(from 210deg at 60% 40%,#3d5a52,#cdbb8a,#b3552e,#3d5a52);}
+.cv-resume-projects::before{content:"";position:absolute;inset:30% 18% 30% 18%;background:rgba(250,246,236,.85);box-shadow:0 8px 18px rgba(0,0,0,.25)}
+.cv-resume-achievements{background:radial-gradient(60% 60% at 50% 38%,#e9c46a,#a85b22 70%,#5b2e10);}
+.cv-resume-achievements::before{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 38%,rgba(255,245,220,.18) 0 6deg,transparent 6deg 18deg)}
+.cv-growth-childhood{background:linear-gradient(to bottom,#bcd5dd 0 58%,#dfd3ae 58%);}
+.cv-growth-childhood::before{content:"";position:absolute;top:18%;left:22%;width:34%;height:18%;background:#fbf7ec;clip-path:polygon(0 60%,100% 0,55% 100%,42% 62%)}
+.cv-growth-student{background:linear-gradient(to bottom,#1d2433 0 70%,#2c3a4a 70%);}
+.cv-growth-student::before{content:"";position:absolute;top:30%;left:34%;width:32%;height:26%;background:radial-gradient(closest-side,#ffe9ad,#d9a84e 70%,transparent 71%);filter:blur(1px)}
+.cv-growth-turning{background:linear-gradient(115deg,#23303b 0 52%,#e8dcc2 52%);}
+.cv-growth-turning::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 49.4%,#b3552e 49.4% 50.6%,transparent 50.6%)}
+.cv-growth-reflection{background:radial-gradient(70% 90% at 50% 45%,#cdd9d4,#7d9088 60%,#3c4a44);}
+.cv-growth-reflection::before{content:"";position:absolute;inset:16% 30%;border-radius:50% 50% 46% 46%/56% 56% 42% 42%;border:3px solid rgba(250,246,236,.8);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.04))}
+.cv-growth-future{background:linear-gradient(to top,#10141d 0 30%,#33415c 60%,#c97b4a 88%,#f2d6a0);}
+.cv-growth-future::before{content:"";position:absolute;left:12%;right:12%;bottom:18%;height:2px;background:rgba(250,240,220,.85);box-shadow:0 -10px 24px 6px rgba(242,214,160,.35)}
+.cv-learning-interests{background:#1b2030}
+.cv-learning-interests::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(3px 3px at 24% 30%,#ffe9ad,transparent 60%),
+  radial-gradient(2.5px 2.5px at 62% 22%,#d8a263,transparent 60%),
+  radial-gradient(3px 3px at 74% 58%,#9fc6c0,transparent 60%),
+  radial-gradient(2px 2px at 38% 66%,#fbf7ec,transparent 60%),
+  radial-gradient(2.5px 2.5px at 52% 44%,#e07a4a,transparent 60%);
+}
+.cv-learning-interests::after{content:"";position:absolute;inset:0;background:
+  linear-gradient(32deg,transparent 49.7%,rgba(216,162,99,.4) 49.7% 50.3%,transparent 50.3%),
+  linear-gradient(-24deg,transparent 49.7%,rgba(159,198,192,.35) 49.7% 50.3%,transparent 50.3%)}
+.cv-learning-resources{background:repeating-linear-gradient(90deg,#7d5a3a 0 14%,#5d4128 14% 16%,#a8754a 16% 30%,#4d3722 30% 32%,#43596b 32% 47%,#5d4128 47% 49%,#b3552e 49% 63%,#4d3722 63% 65%,#9c8a5c 65% 80%,#5d4128 80% 82%,#2e3a45 82% 100%);}
+.cv-learning-resources::before{content:"";position:absolute;left:0;right:0;top:78%;height:6%;background:#3a2c1c;box-shadow:0 -4px 10px rgba(0,0,0,.4)}
+.cv-learning-method{background:linear-gradient(to bottom,#e9e1cd,#cdbf9f);}
+.cv-learning-method::before{content:"";position:absolute;inset:14% 16%;background:
+  linear-gradient(#857457 2px,transparent 2px) 0 0/100% 25%,
+  linear-gradient(90deg,transparent 0 8%,rgba(179,85,46,.7) 8% 10%,transparent 10%);
+}
+.cv-learning-kb{background:linear-gradient(150deg,#243530,#0f1715 65%);}
+.cv-learning-kb::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(rgba(159,198,192,.22) 1px,transparent 1px) 0 0/100% 16.6%,
+  linear-gradient(90deg,rgba(159,198,192,.22) 1px,transparent 1px) 0 0/16.6% 100%}
+.cv-learning-kb::after{content:"";position:absolute;top:40%;left:40%;width:20%;height:17%;background:rgba(216,162,99,.85);box-shadow:0 0 22px rgba(216,162,99,.6)}
+.painting .hint{
+  position:absolute;left:0;right:0;bottom:-2rem;text-align:center;
+  font-size:.68rem;letter-spacing:.32em;
+}
+.in-dark .painting .hint{color:#6e6e67}
+.in-light .painting .hint{color:#8e8c84}
+
+/* ---------- 旁置内容板 ---------- */
+.panel{flex:0 1 410px;min-width:0}
+.panel .no{font-size:.68rem;letter-spacing:.34em;text-transform:uppercase}
+.panel h2{font-size:clamp(1.5rem,2.6vw,2.05rem);font-weight:600;margin:.4rem 0 .1rem;letter-spacing:.06em}
+.panel .sub{font-size:.95rem;letter-spacing:.08em}
+.panel .meta{margin-top:.55rem;font-size:.76rem;letter-spacing:.1em}
+.panel .rule{border:none;margin:1rem 0}
+.panel .excerpt{font-size:.94rem}
+.panel .keylist{list-style:none;margin:.9rem 0 0}
+.panel .keylist li{position:relative;padding-left:1.1em;margin:.34rem 0;font-size:.85rem}
+.panel .keylist li::before{content:"—";position:absolute;left:0}
+.quicklinks{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.quicklinks a,.quicklinks button{
+  font-size:.76rem;letter-spacing:.14em;text-decoration:none;
+  border-radius:999px;padding:.34em 1.05em;
+  transition:background .25s,color .25s,border-color .25s;
+}
+.more{
+  display:inline-block;margin-top:1.25rem;padding:.25em 0;
+  font-size:.88rem;letter-spacing:.2em;
+  transition:letter-spacing .3s,border-color .3s;
+}
+.more:hover,.more:focus-visible{letter-spacing:.3em}
+
+/* 暗房间文字 */
+.in-dark .panel{color:#ecece8}
+.in-dark .panel h2{color:#fff}
+.in-dark .panel .sub{color:#a8a8a0}
+.in-dark .panel .meta{color:#7c7c74}
+.in-dark .panel .excerpt{color:#cfcfc8}
+.in-dark .panel .keylist li{color:#a0a098}
+.in-dark .quicklinks a,.in-dark .quicklinks button{border:1px solid rgba(255,255,255,.26);color:#dcdcd6}
+.in-dark .more{color:#fff;border-bottom:1px solid rgba(255,255,255,.6)}
+
+/* 亮房间文字 */
+.in-light .panel{color:#23231f}
+.in-light .panel h2{color:#141412}
+.in-light .panel .sub{color:#62625b}
+.in-light .panel .meta{color:#8e8c84}
+.in-light .panel .excerpt{color:#3c3c36}
+.in-light .panel .keylist li{color:#55554e}
+.in-light .quicklinks a,.in-light .quicklinks button{border:1px solid rgba(0,0,0,.3);color:#2c2c27}
+.in-light .more{color:#141412;border-bottom:1px solid rgba(0,0,0,.6)}
+
+/* 每厅一支强调色 */
+.exhibit .panel .no{color:var(--acc)}
+.exhibit .panel .rule{border-top:1px solid var(--acc);opacity:.65}
+.exhibit .panel .keylist li::before{color:var(--acc)}
+.exhibit .quicklinks a:hover,.exhibit .quicklinks a:focus-visible,
+.exhibit .quicklinks button:hover,.exhibit .quicklinks button:focus-visible{
+  background:var(--acc);color:#fff;border-color:var(--acc);
+}
+
+/* ---------- 拍立得 ---------- */
+.polaroid{
+  float:right;width:132px;margin:.2rem 0 .7rem 1rem;
+  background:#fff;padding:8px 8px 26px;
+  box-shadow:0 12px 28px rgba(0,0,0,.3);
+  transform:rotate(2.6deg);
+}
+.polaroid .shot{
+  display:grid;place-items:center;aspect-ratio:1/1;overflow:hidden;
+  background:repeating-linear-gradient(45deg,#ecece6 0 10px,#e3e3dc 10px 20px);
+  color:#8e8c84;font-size:.58rem;text-align:center;padding:4px;letter-spacing:.06em;
+}
+.polaroid .cap{
+  display:block;margin-top:7px;font-size:.6rem;color:#55554e;text-align:center;
+  font-style:italic;letter-spacing:.04em;line-height:1.4;
+}
+
+/* ============================================================
+   外立面：网站首页 = 建筑本体
+   ============================================================ */
+.facade{
+  display:flex;flex-direction:column;align-items:center;gap:.45rem;
+  text-align:center;padding-top:calc(var(--topbar-h) + .2rem);color:#d9d5ca;
+}
+.f-kicker{font-size:.64rem;letter-spacing:.6em;text-indent:.6em;color:#8f8a7c}
+
+/* —— 建筑本体：山花 + 檐部铭文 + 六柱柱廊 + 大门 + 三级台阶 + 两翼 —— */
+.f-building{
+  position:relative;width:min(94vw,920px);margin:.5rem 0 .2rem;
+  filter:drop-shadow(0 44px 60px rgba(0,0,0,.55));
+}
+.f-pediment{
+  height:clamp(54px,8.5vh,84px);margin:0 4%;
+  clip-path:polygon(50% 0,100% 100%,0 100%);
+  background:linear-gradient(to bottom,#34373e,#26282e 70%,#1d1f24);
+}
+.f-frieze{
+  display:flex;align-items:center;justify-content:center;
+  height:clamp(40px,6vh,54px);margin:0 2%;
+  background:linear-gradient(to bottom,#3b3e46,#2a2c32 60%,#202227);
+  border-top:2px solid #484b54;border-bottom:3px solid #15161a;
+}
+.f-frieze span{
+  font-size:clamp(.9rem,2vw,1.15rem);font-weight:600;color:var(--acc,#c8b27a);
+  letter-spacing:.9em;text-indent:.9em;text-shadow:0 1px 0 rgba(0,0,0,.8);
+  opacity:.92;
+}
+.f-colonnade{
+  position:relative;display:flex;align-items:flex-end;justify-content:space-between;
+  height:clamp(200px,30vh,300px);padding:0 clamp(14px,3%,30px);
+  background:
+    radial-gradient(120% 90% at 50% 100%,rgba(236,222,184,.07),transparent 60%),
+    linear-gradient(to bottom,#191b20,#101216 80%);
+}
+.f-col{
+  position:relative;width:clamp(22px,3.2vw,34px);height:94%;
+  background:
+    linear-gradient(to right,#23252a,#4a4d55 38%,#54575f 50%,#42454c 64%,#1f2126),
+    repeating-linear-gradient(to right,rgba(0,0,0,.12) 0 3px,transparent 3px 6px);
+  background-blend-mode:normal,multiply;
+}
+.f-col::before{ /* 柱头 */
+  content:"";position:absolute;top:-9px;left:-5px;right:-5px;height:9px;
+  background:linear-gradient(to bottom,#4d5058,#34373e);
+}
+.f-col::after{ /* 柱础上的暖色地灯 */
+  content:"";position:absolute;left:-8px;right:-8px;bottom:0;height:44%;
+  background:radial-gradient(60% 90% at 50% 100%,rgba(222,196,138,.22),transparent 72%);
+}
+.f-door{
+  position:relative;width:clamp(140px,21%,200px);height:78%;
+  border:2px solid var(--acc,#c8b27a);border-bottom:none;
+  border-radius:46% 46% 0 0 / 16%;
+  background:linear-gradient(to bottom,#0b0c0f,#15161b);
+  box-shadow:0 0 70px -8px rgba(200,178,122,.26),inset 0 0 46px rgba(0,0,0,.75);
+}
+.f-door::before{ /* 门缝 */
+  content:"";position:absolute;top:8%;bottom:0;left:50%;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(200,178,122,.5) 30%,rgba(200,178,122,.85));
+}
+.f-light{ /* 门内透出的暖光 */
+  position:absolute;left:6%;right:6%;bottom:0;height:40%;
+  background:radial-gradient(80% 100% at 50% 100%,rgba(236,222,184,.4),transparent 75%);
+}
+.f-stairs{display:flex;flex-direction:column;align-items:center}
+.f-stairs i{
+  display:block;height:clamp(8px,1.4vh,12px);
+  background:linear-gradient(to bottom,#33363d,#1c1e23);
+  border-top:1px solid #45484f;
+}
+.f-stairs i:nth-child(1){width:86%}
+.f-stairs i:nth-child(2){width:93%}
+.f-stairs i:nth-child(3){width:100%}
+.f-wing{ /* 两侧裙楼 */
+  position:absolute;bottom:clamp(24px,4.2vh,36px);width:14%;height:42%;
+  background:linear-gradient(to bottom,#22242a,#15171b);
+  box-shadow:inset 0 0 30px rgba(0,0,0,.6);
+}
+.f-wing.wl{left:-13%;border-top:3px solid #34373e}
+.f-wing.wr{right:-13%;border-top:3px solid #34373e}
+
+.f-name{
+  font-size:clamp(1.7rem,4.4vw,2.6rem);font-weight:600;color:#efeadd;
+  letter-spacing:.5em;text-indent:.5em;line-height:1.3;margin-top:.55rem;
+}
+.f-sub{font-size:.74rem;letter-spacing:.3em;text-indent:.3em;color:#8f8a7c}
+.facade .f-enter{
+  --fg:#efeadd;--mut:#bdb6a2;--ln:rgba(220,205,160,.4);--invfg:#141412;
+  margin-top:.8rem;font-size:.84rem;padding:.5em 1.6em;
+}
+.f-note{font-size:.7rem;letter-spacing:.26em;text-indent:.26em;color:#6d6a60;font-style:italic;margin-top:.25rem}
+
+/* ============================================================
+   序厅：进入建筑后的第一个空间
+   ============================================================ */
+.exhibit-hero .wall{flex-direction:column;text-align:center;gap:.8rem;padding-bottom:4.2rem}
+.hero-kicker{font-size:.66rem;letter-spacing:.5em;text-indent:.5em;color:var(--acc)}
+.exhibit-hero .welcome{
+  font-size:clamp(1.9rem,5vw,3.1rem);font-weight:600;color:#141412;
+  letter-spacing:.18em;text-indent:.18em;line-height:1.35;
+}
+.exhibit-hero .manifesto{color:#4a4a44;font-size:clamp(.92rem,1.6vw,1.06rem);max-width:33rem}
+.exhibit-hero .note{font-size:.74rem;color:#8e8c84;font-style:italic;letter-spacing:.2em;margin-top:.2rem}
+.exhibit-hero .hero-rule{width:64px;border:none;border-top:1px solid var(--acc);margin:.3rem auto}
+.hero-meta{display:flex;align-items:center;gap:clamp(1.2rem,3.5vw,2.6rem);margin-top:.5rem;flex-wrap:wrap;justify-content:center}
+.hero-meta .polaroid{float:none;width:124px;margin:0;transform:rotate(-3deg)}
+.chips{display:flex;flex-direction:column;gap:.4rem;text-align:left}
+.chip{font-size:.82rem;color:#55554e;line-height:1.5}
+.chip b{font-weight:600;color:var(--acc);letter-spacing:.22em;margin-right:.7em;font-size:.72rem}
+.exhibit-hero .hero-actions{display:flex;gap:.8rem;flex-wrap:wrap;justify-content:center;margin-top:.8rem}
+.exhibit-hero .btn-line{--fg:#141412;--mut:#55554e;--ln:rgba(0,0,0,.3);--invfg:#fff}
+.deco-frame{
+  position:absolute;top:50%;width:170px;aspect-ratio:4/5;pointer-events:none;
+  border:1px solid rgba(0,0,0,.16);background:rgba(0,0,0,.03);
+}
+.deco-frame.l1{left:-21%;transform:translateY(-58%) translateZ(-360px) rotateY(34deg)}
+.deco-frame.l2{left:-34%;transform:translateY(-46%) translateZ(-720px) rotateY(38deg);opacity:.55}
+.deco-frame.r1{right:-21%;transform:translateY(-58%) translateZ(-360px) rotateY(-34deg)}
+.deco-frame.r2{right:-34%;transform:translateY(-46%) translateZ(-720px) rotateY(-38deg);opacity:.55}
+@media (max-width:1100px){.deco-frame{display:none}}
+
+/* ============================================================
+   总览大厅
+   ============================================================ */
+.exhibit-overview{width:min(1340px,98vw)}
+.ovwrap{padding-top:calc(var(--topbar-h) + .6rem);text-align:center;transform-style:preserve-3d}
+.ov-kicker{font-size:.7rem;letter-spacing:.5em;text-indent:.5em;color:#8a7a55}
+.ov-title{font-size:clamp(1.5rem,3.2vw,2.2rem);letter-spacing:.3em;text-indent:.3em;color:#141412;margin:.3rem 0 .2rem;font-weight:600}
+.ov-sub{font-size:.82rem;color:#6a6a63;letter-spacing:.12em}
+.ov-gates{position:relative;height:min(54vh,440px);margin-top:1.2rem;transform-style:preserve-3d}
+.ov-gate{
+  position:absolute;left:50%;top:50%;width:188px;height:min(46vh,360px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;
+  background:var(--wall);border:1px solid var(--acc);
+  box-shadow:0 26px 50px -18px rgba(0,0,0,.35);
+  transition:box-shadow .3s,border-color .3s;
+}
+.ov-gate::before{content:"";position:absolute;inset:7px;border:1px solid var(--acc);opacity:.4;pointer-events:none}
+.ov-gate:hover,.ov-gate:focus-visible{border-color:var(--acc);box-shadow:0 34px 64px -16px rgba(0,0,0,.5),0 0 0 1px var(--acc)}
+.ov-gate .g-no{font-size:.66rem;letter-spacing:.4em;text-indent:.4em;color:var(--acc)}
+.ov-gate .g-name{font-size:1.35rem;letter-spacing:.42em;text-indent:.42em;font-weight:600}
+.ov-gate .g-theme{font-size:.7rem;letter-spacing:.14em;opacity:.75;padding:0 .8rem;line-height:1.6}
+.ov-gate .g-count{font-size:.64rem;letter-spacing:.3em;text-indent:.3em;opacity:.6}
+.ov-gate .g-enter{
+  margin-top:.5rem;font-size:.7rem;letter-spacing:.26em;text-indent:.26em;
+  border:1px solid var(--acc);border-radius:999px;padding:.34em 1em;color:var(--acc);
+  transition:background .25s,color .25s;
+}
+.ov-gate:hover .g-enter,.ov-gate:focus-visible .g-enter{background:var(--acc);color:#fff}
+.ov-gate.in-light{color:#23231f}
+.ov-gate.in-light .g-name{color:#141412}
+.ov-gate.in-dark{color:#dcdcd6}
+.ov-gate.in-dark .g-name{color:#fff}
+
+/* ============================================================
+   门厅：收窄到走廊内，避免与墙体穿插
+   ============================================================ */
+.exhibit-gate{width:min(92vw,1180px)}
+.gatewrap{position:relative;height:min(76vh,680px);display:grid;place-items:center}
+.gate-wing{
+  position:absolute;top:6%;bottom:6%;width:calc(50% - min(27vw,300px));
+  background:var(--wall);opacity:.97;
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.4);
+}
+.gate-wing.wl{left:0;border-right:2px solid var(--acc)}
+.gate-wing.wr{right:0;border-left:2px solid var(--acc)}
+.gate-frame{
+  position:relative;width:min(54vw,600px);height:88%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;
+  border:2px solid var(--acc);outline:1px solid var(--acc);outline-offset:12px;
+  background:var(--wall);text-align:center;
+}
+.gate-frame::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 42% at 50% 0%,rgba(255,255,255,.14),transparent 70%);
+}
+.exhibit-gate.in-light .gate-frame::after{background:radial-gradient(60% 42% at 50% 0%,rgba(0,0,0,.05),transparent 70%)}
+.g-kicker{font-size:.7rem;letter-spacing:.46em;text-indent:.46em;color:var(--acc)}
+.gate-frame .g-name{
+  font-size:clamp(2.1rem,5.6vw,3.4rem);font-weight:600;
+  letter-spacing:.5em;text-indent:.5em;line-height:1.3;
+}
+.gate-frame .g-theme{font-size:.84rem;letter-spacing:.3em;text-indent:.3em;opacity:.75}
+.gate-frame .g-cue{margin-top:1.6rem;font-size:.66rem;letter-spacing:.42em;text-indent:.42em;opacity:.6}
+.exhibit-gate.in-dark .gate-frame{color:#ecece8}
+.exhibit-gate.in-dark .g-name{color:#fff}
+.exhibit-gate.in-light .gate-frame{color:#2c2c27}
+.exhibit-gate.in-light .g-name{color:#141412}
+
+/* ---------- 回声厅 ---------- */
+.copied-tip{font-size:.76rem;margin-top:.5rem;min-height:1.1em;letter-spacing:.1em}
+.in-dark .copied-tip{color:#fff}
+.cv-echo{background:linear-gradient(120deg,#3c3c3a 0 44%,#e9e9e3 44%)}
+.cv-echo::before{content:"";position:absolute;inset:0;background:
+  linear-gradient(120deg,transparent 41%,rgba(20,20,20,.85) 41% 44%,transparent 44%),
+  repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 2px,transparent 2px 6px)}
+.cv-echo::after{content:"未完成";position:absolute;right:8%;bottom:6%;font-size:.78rem;letter-spacing:.3em;color:#8a8a82}
+
+/* ---------- 滚动提示：主题色替代混合模式 ---------- */
+.scroll-cue{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:110;
+  font-size:.68rem;letter-spacing:.4em;text-indent:.4em;text-align:center;
+  pointer-events:none;transition:opacity .6s,color .6s;
+  color:#fff;
+}
+html[data-room="light"] .scroll-cue{color:#141412}
+.scroll-cue::after{
+  content:"";display:block;width:1px;height:26px;margin:.5rem auto 0;
+  background:linear-gradient(to bottom,currentColor,transparent);
+  animation:cue-drop 2.2s ease-in-out infinite;
+}
+@keyframes cue-drop{0%{transform:scaleY(0);transform-origin:top}55%{transform:scaleY(1);transform-origin:top}56%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* ============================================================
+   近观模式：适配视口的固定面板 + 内部滚动 + 折叠
+   ============================================================ */
+.closeup{position:fixed;inset:0;z-index:200;display:none;background:rgba(8,8,7,.88)}
+.closeup.is-open{display:block;animation:dim-in .25s ease}
+.closeup.is-closing{animation:dim-out .2s ease forwards}
+@keyframes dim-in{from{opacity:0}to{opacity:1}}
+@keyframes dim-out{from{opacity:1}to{opacity:0}}
+.closeup-scroll{
+  position:absolute;inset:0;display:grid;place-items:center;
+  padding:clamp(.8rem,3vh,2.2rem) clamp(.6rem,3vw,2rem);overflow:hidden;
+}
+.closeup-panel{
+  position:relative;display:flex;flex-direction:column;
+  width:min(880px,100%);max-height:min(88vh,860px);
+  background:#f6f5f1;color:#1a1a18;
+  box-shadow:0 60px 160px rgba(0,0,0,.85);
+  animation:closeup-in .45s cubic-bezier(.22,.9,.3,1);
+}
+.is-closing .closeup-panel{animation:closeup-out .2s ease forwards}
+@keyframes closeup-in{from{transform:scale(.94) translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@keyframes closeup-out{from{transform:none;opacity:1}to{transform:scale(.96) translateY(10px);opacity:0}}
+/* 头部：画 + 标题同框，压缩高度 */
+.closeup-art{position:relative;flex:0 0 auto;height:clamp(150px,24vh,240px);background:#111;overflow:hidden}
+.closeup-art .cv{position:absolute;inset:0;filter:grayscale(.35) saturate(.8)}
+.closeup-art::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(12,12,10,.88),transparent 62%)}
+.closeup-head{position:absolute;left:clamp(1.2rem,4vw,2.6rem);right:4.4rem;bottom:.8rem;z-index:1;color:#f2f1ea}
+.closeup-head .no{font-size:.66rem;letter-spacing:.34em;color:#cfc9b8}
+.closeup-head h2{font-size:clamp(1.35rem,2.8vw,1.9rem);margin:.15rem 0 0;letter-spacing:.05em;color:#fff}
+.closeup-head .sub{font-size:.78rem;color:#c6c2b6;letter-spacing:.08em}
+/* 内容区：面板内部滚动 */
+.closeup-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:1.2rem clamp(1.4rem,5vw,3.4rem) 1.8rem}
+.closeup-body .epigraph{
+  font-style:italic;color:#55554f;border-left:2px solid #1a1a18;
+  padding:.15rem 0 .15rem 1.1rem;margin:.4rem 0 1rem;
+}
+.closeup-body p{margin:.8rem 0;color:#3a3a35}
+/* 折叠组件：长内容收起，点击展开 */
+.fold{margin:1rem 0;border:1px solid #ddddd4;background:#fbfaf7}
+.fold summary{
+  list-style:none;cursor:pointer;padding:.65rem 1rem;
+  font-size:.8rem;letter-spacing:.18em;color:#55554e;
+  display:flex;align-items:center;gap:.6em;
+  transition:background .25s,color .25s;
+}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::before{content:"▸";font-size:.72em;transition:transform .25s;color:#9a957f}
+.fold[open] summary::before{transform:rotate(90deg)}
+.fold summary:hover,.fold summary:focus-visible{background:#141412;color:#fff}
+.fold summary:hover::before,.fold summary:focus-visible::before{color:#fff}
+.fold .fold-body{padding:.2rem 1rem .8rem;border-top:1px dashed #e2e1d8}
+.closeup-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.8rem;margin:.6rem 0}
+.ph{
+  aspect-ratio:4/3;border:1px solid #d6d6cf;display:grid;place-items:center;
+  background:repeating-linear-gradient(45deg,#efefe9 0 12px,#e7e7e0 12px 24px);
+  color:#8c8c84;font-size:.76rem;text-align:center;padding:.6rem;letter-spacing:.1em;
+}
+.highlights{margin:.5rem 0;padding-left:1.2rem}
+.highlights li{margin:.4rem 0;color:#3a3a35}
+.highlights li::marker{color:#161616}
+.closeup-links{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.1rem}
+.closeup-links a{
+  border:1px solid #b9b9b1;border-radius:999px;padding:.34em 1.1em;font-size:.82rem;
+  color:#3a3a35;text-decoration:none;letter-spacing:.08em;
+  transition:background .25s,color .25s,border-color .25s;
+}
+.closeup-links a:hover,.closeup-links a:focus-visible{background:#161616;color:#fff;border-color:#161616}
+.closeup-close{
+  position:absolute;top:.7rem;right:.7rem;z-index:3;
+  width:40px;height:40px;border-radius:50%;background:rgba(12,12,12,.78);color:#fff;
+  font-size:1.05rem;line-height:1;border:1px solid rgba(255,255,255,.3);
+  transition:background .25s,color .25s;
+}
+.closeup-close:hover,.closeup-close:focus-visible{background:#fff;color:#000}
+.closeup-nav{display:flex;justify-content:space-between;gap:1rem;border-top:1px solid #ddddd6;margin-top:1.4rem;padding-top:.9rem}
+.closeup-nav button{font-size:.84rem;color:#6f6f67;letter-spacing:.1em;padding:.3em .4em}
+.closeup-nav button:hover,.closeup-nav button:focus-visible{color:#000}
+
+/* ============================================================
+   响应式
+   ============================================================ */
+@media (max-width:880px){
+  .halls button{letter-spacing:.08em;padding:.4em .4em}
+  .topbar{gap:.7rem}
+  .topbar-right .count{display:none}
+  .brand i{display:none}
+}
+@media (max-width:700px){
+  :root{--topbar-h:52px}
+  .brand{font-size:.8rem;letter-spacing:.12em}
+  .halls{gap:0}
+  .halls button{font-size:.78rem}
+  .wall{flex-direction:column;gap:1.4rem;padding-top:calc(var(--topbar-h) + .6rem)}
+  .painting{width:min(62vw,290px)}
+  .painting .hint{display:none}
+  .panel{flex:0 1 auto;width:min(92vw,440px);text-align:left}
+  .panel h2{font-size:1.4rem}
+  .panel .keylist li{font-size:.8rem}
+  .polaroid{width:104px;padding:6px 6px 20px}
+  .exhibit-hero .welcome{letter-spacing:.1em;text-indent:.1em}
+  .hero-meta{gap:1.2rem}
+  .f-name{letter-spacing:.3em;text-indent:.3em}
+  .ov-gates{height:auto;display:flex;flex-direction:column;align-items:center;gap:.7rem;transform:none}
+  .ov-gate{position:static!important;transform:none!important;width:min(86vw,360px);height:auto;padding:1rem .8rem;flex-direction:row;flex-wrap:wrap;gap:.4rem .9rem;justify-content:flex-start;text-align:left}
+  .ov-gate .g-name{letter-spacing:.2em;text-indent:0;font-size:1.1rem}
+  .ov-gate .g-theme{padding:0;width:100%;order:5}
+  .ov-gate .g-enter{margin-top:0;margin-left:auto}
+  .gate-frame .g-name{letter-spacing:.3em;text-indent:.3em}
+  .gate-wing{display:none}
+  .gate-frame{width:min(88vw,640px)}
+  .closeup-panel{max-height:94vh}
+  .closeup-art{height:clamp(110px,18vh,170px)}
+  .closeup-nav{flex-direction:column}
+}
+@media (max-height:680px) and (min-width:701px){
+  .painting{width:clamp(210px,38vh,320px)}
+  .exhibit-hero .welcome{font-size:clamp(1.5rem,4.4vh,2.2rem)}
+  .hero-meta .polaroid{width:100px}
+  .f-colonnade{height:clamp(140px,24vh,220px)}
+  .f-pediment{height:clamp(36px,6vh,56px)}
+  .f-name{font-size:clamp(1.3rem,3.4vh,1.8rem)}
+}
+
+/* ============================================================
+   减少动态：退化为分厅着色的纵向长卷
+   ============================================================ */
+html.reduced-motion .viewport{position:static;height:auto;perspective:none;overflow:visible;background:#0c0c0c!important}
+html.reduced-motion .viewport::after{display:none}
+html.reduced-motion .world{position:static;transform:none!important}
+html.reduced-motion .scroll-space{display:none}
+html.reduced-motion .plane{display:none}
+html.reduced-motion .deco-frame{display:none}
+html.reduced-motion .scroll-cue{display:none}
+html.reduced-motion .exhibit{
+  position:relative;left:auto;top:auto;transform:none!important;
+  opacity:1!important;pointer-events:auto;visibility:visible!important;
+  margin:0 auto;width:100%;max-width:none;padding:7vh 0;
+}
+html.reduced-motion .exhibit.in-light{background:var(--wall,#eae8e3)}
+html.reduced-motion .exhibit.in-dark{background:var(--wall,#101010)}
+html.reduced-motion .exhibit-facade{background:#101216!important}
+html.reduced-motion .exhibit-work .panel,html.reduced-motion .exhibit-echo .panel{opacity:1;transform:none}
+html.reduced-motion .painting .hint{opacity:1}
+html.reduced-motion .gatewrap{height:auto;padding:3rem 0}
+html.reduced-motion .gate-wing{display:none}
+html.reduced-motion .gate-frame{width:min(88vw,640px);height:auto;padding:2.4rem 1rem}
+html.reduced-motion .ovwrap{transform:none}
+html.reduced-motion .ov-gates{height:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;transform:none}
+html.reduced-motion .ov-gate{position:static!important;transform:none!important}
+html.reduced-motion .closeup-panel{animation:none}
+html.reduced-motion .closeup.is-open{animation:none}
+@media (prefers-reduced-motion:reduce){
+  .scroll-cue::after{animation:none}
+  .closeup-panel,.closeup.is-open{animation:none}
+  .painting{transition:border-color .2s}
+  .exhibit-work .panel,.exhibit-echo .panel{transition:none}
+}
+
+
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<noscript>
+<main class="fallback" id="main">
+  <h1>嘉亮的空间 · 杨嘉亮</h1>
+  <p class="note">把履历挂上墙，把心事调成光。这不是一份简历列表，而是一条了解我的路径。您的浏览器未启用 JavaScript，以下是全部展厅内容的顺序阅读版。</p>
+
+  <h2>一 · 履历馆 — 我做过什么</h2>
+  <h3>01《求学的底色》— 教育经历</h3>
+  <p>本科与研究生阶段的专业学习构成了我的知识地基：系统的课程训练、若干次奖学金与竞赛经历，以及在课程项目中第一次完整做成一件事的体验。（占位内容，待替换为真实学历信息。）</p>
+  <h3>02《十年走廊》— 工作与实践时间线</h3>
+  <p>从校园实践到正式工作，每一段经历按时间线排开：实习、第一份全职工作、关键岗位变化，以及在每一段中真正学到的东西。（占位内容。）</p>
+  <h3>03《手作之物》— 代表项目与产出</h3>
+  <p>三到五个我最有代表性的项目：背景、我承担的角色、技术或方法选择、最终产出与上线效果。（占位内容。）</p>
+  <h3>04《可度量的光》— 成果、能力与关键数据</h3>
+  <p>奖项、认证、关键业务数据与能力清单，用可验证的事实呈现职业可信度。（占位内容。）</p>
+
+  <h2>二 · 成长馆 — 我如何成为现在的我</h2>
+  <h3>05《纸飞机》— 童年记忆</h3>
+  <p>关于好奇心最早的样子：拆开又装不回去的玩具、第一次问出“为什么”的时刻。（占位内容，遵循选择性真诚。）</p>
+  <h3>06《晚自习的灯》— 学生阶段</h3>
+  <p>漫长而安静的积累期：考试、朋友、深夜的台灯，以及第一次意识到“我擅长什么”。（占位内容。）</p>
+  <h3>07《转折点》— 一次重要转折</h3>
+  <p>一次改变方向的决定，以及它如何重新定义了我对自己的预期。（占位内容。）</p>
+  <h3>08《此刻的镜子》— 当前阶段的反思</h3>
+  <p>现在的我如何看待工作、学习与生活的平衡，正在练习什么、放下什么。（占位内容。）</p>
+  <h3>09《未抵达的远方》— 面向未来的目标</h3>
+  <p>三年与十年尺度上的目标，以及我打算如何走过去。（占位内容。）</p>
+
+  <h2>三 · 学习馆 — 我的精神食粮与知识系统</h2>
+  <h3>10《兴趣星图》— 当前兴趣地图</h3>
+  <p>正在投入时间的领域与它们之间的连线。（占位内容。）</p>
+  <h3>11《公共书架》— 常用学习网站与资料</h3>
+  <ul>
+    <li>MDN Web Docs — Web 技术参考：<a href="https://developer.mozilla.org">developer.mozilla.org</a></li>
+    <li>arXiv — 学术论文预印本：<a href="https://arxiv.org">arxiv.org</a></li>
+    <li>Wikipedia — 通识入口：<a href="https://www.wikipedia.org">wikipedia.org</a></li>
+  </ul>
+  <h3>12《工作台》— 方法论与学习流程</h3>
+  <p>输入、消化、输出、回顾四步循环，以及支撑它们的具体工具。（占位内容。）</p>
+  <h3>13《索引之屋》— 个人知识库入口</h3>
+  <p>以主题索引组织的精选笔记，入口链接待发布后补充。（占位内容。）</p>
+
+  <h2>四 · 回声厅 — 联系与离场</h2>
+  <p>这座画室的最后一幅画尚未完成——未来仍在继续。</p>
+  <ul>
+    <li>邮箱：<a href="mailto:jialiangyang261@gmail.com">jialiangyang261@gmail.com</a></li>
+    <li>社交账号与简历下载：占位，待补充。</li>
+  </ul>
+  <p class="note">© 杨嘉亮 · 嘉亮的空间</p>
+</main>
+</noscript>
+
+<!-- ============ 个人空间应用（由 JavaScript 渲染） ============ -->
+<div id="app">
+  <header class="topbar">
+    <span class="brand">嘉亮的空间<i>JIALIANG'S SPACE</i></span>
+    <nav class="halls" aria-label="空间导航" id="halls-nav">
+      <button data-hall="entry"    aria-current="true">序厅</button>
+      <button data-hall="resume"   aria-current="false">履历馆</button>
+      <button data-hall="growth"   aria-current="false">成长馆</button>
+      <button data-hall="learning" aria-current="false">学习馆</button>
+      <button data-hall="echo"     aria-current="false">回声厅</button>
+    </nav>
+    <div class="topbar-right">
+      <span class="count" id="hud-count" aria-live="polite"></span>
+      <button class="btn-line" id="btn-sound" aria-pressed="false">声 · 关</button>
+    </div>
+  </header>
+  <div class="progress" role="progressbar" aria-label="参观进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress">
+    <div id="progress-bar"></div>
+  </div>
+
+  <div class="viewport" id="viewport">
+    <main class="world" id="main" aria-label="个人空间"></main>
+  </div>
+  <div class="scroll-space" id="scroll-space" aria-hidden="true"></div>
+
+  <div class="scroll-cue" id="scroll-cue" aria-hidden="true">向下滚动 · 进入空间</div>
+
+  <!-- 近观模式：作品背后的思考与故事 -->
+  <div class="closeup" id="closeup" role="dialog" aria-modal="true" aria-labelledby="closeup-title" hidden>
+    <div class="closeup-scroll" id="closeup-scroll"></div>
+  </div>
+</div>
+
+<script>
+
+'use strict';
+/* ============================================================
+   集中式内容数据模型
+   首版为高质量策展占位内容，之后替换为真实资料即可，
+   场景逻辑不依赖任何具体文案。
+   ============================================================ */
+const HALLS = [
+  { id: 'entry',    name: '序厅',   theme: '我是谁' },
+  { id: 'resume',   name: '履历馆', theme: '我做过什么' },
+  { id: 'growth',   name: '成长馆', theme: '我如何成为现在的我' },
+  { id: 'learning', name: '学习馆', theme: '我的精神食粮与知识系统' },
+  { id: 'echo',     name: '回声厅', theme: '联系、留言与离场' }
+];
+
+const WORKS = [
+  /* ---------------- 履历馆 ---------------- */
+  {
+    id: 'resume-education', gallery: 'resume',
+    title: '求学的底色', subtitle: '教育经历',
+    year: '2014–2021', medium: '档案、证书、纸本拼贴',
+    cover: 'cv-resume-education',
+    excerpt: '知识的地基，是后来一切结构的承重墙。',
+    body: [
+      '这幅作品由成绩单、课程笔记与录取通知书的碎片拼贴而成。本科与研究生阶段的专业学习构成了我的知识地基：系统的课程训练教会我如何把一个庞大的问题拆成可解的部分，而课程项目则让我第一次体验到"完整做成一件事"的满足。',
+      '（占位内容：此处替换为真实的学校、专业、学位、主修课程与在校经历。）'
+    ],
+    images: ['照片占位 · 毕业证书', '照片占位 · 校园一角'],
+    highlights: ['学位与专业方向（占位）', '奖学金与竞赛获奖（占位）', '关键课程与课程项目（占位）'],
+    links: []
+  },
+  {
+    id: 'resume-timeline', gallery: 'resume',
+    title: '十年走廊', subtitle: '工作与实践时间线',
+    year: '2016–至今', medium: '时间线装置、灯箱',
+    cover: 'cv-resume-timeline',
+    excerpt: '每一段经历都是走廊里的一扇门，推开之后才知道里面的光。',
+    body: [
+      '一条贯穿画面的金色走廊，把实习、第一份全职工作与几次关键的岗位变化串在同一条时间线上。重要的不是头衔的更替，而是在每一段里真正学到的东西：第一次独立负责一个模块、第一次带人、第一次为决策承担后果。',
+      '（占位内容：此处替换为真实的公司、职位、时间区间与职责描述。）'
+    ],
+    images: ['照片占位 · 工位与白板'],
+    highlights: ['实习与早期实践（占位）', '正式工作经历，按时间排列（占位）', '角色转变与责任升级的节点（占位）'],
+    links: []
+  },
+  {
+    id: 'resume-projects', gallery: 'resume',
+    title: '手作之物', subtitle: '代表项目与工作产出',
+    year: '近五年', medium: '界面截图、代码、文档',
+    cover: 'cv-resume-projects',
+    excerpt: '作品是最诚实的简历。',
+    body: [
+      '画面中央悬浮的白色平面，象征那些被真正交付出去的东西：上线的产品、写下的文档、被他人使用的工具。每个项目都按照同一种策展结构呈现——背景与问题、我承担的角色、技术或方法的选择，以及最终产出与影响。',
+      '（占位内容：此处替换为 3–5 个真实代表项目，每个附截图、链接与成果数据。）'
+    ],
+    images: ['界面截图占位 · 项目一', '界面截图占位 · 项目二', '文档占位 · 设计稿'],
+    highlights: ['项目一：背景 / 角色 / 产出（占位）', '项目二：背景 / 角色 / 产出（占位)', '项目三：背景 / 角色 / 产出（占位）'],
+    links: [{ label: '代码仓库（占位）', href: 'https://github.com/' }]
+  },
+  {
+    id: 'resume-achievements', gallery: 'resume',
+    title: '可度量的光', subtitle: '成果、能力与关键数据',
+    year: '持续累积', medium: '数据、奖项、金属箔',
+    cover: 'cv-resume-achievements',
+    excerpt: '光可以被感受，也可以被度量。',
+    body: [
+      '从画面中心放射出的光束，每一道都对应一个可验证的事实：一个奖项、一项认证、一组关键业务数据。职业可信度不靠形容词堆砌，而靠这些可以被核对的光。',
+      '（占位内容：此处替换为真实的奖项、认证、量化业绩与能力清单。）'
+    ],
+    images: ['照片占位 · 获奖证书'],
+    highlights: ['核心能力清单（占位）', '关键业务数据，例如规模 / 增长 / 性能指标（占位）', '奖项与认证（占位）'],
+    links: []
+  },
+
+  /* ---------------- 成长馆 ---------------- */
+  {
+    id: 'growth-childhood', gallery: 'growth',
+    title: '纸飞机', subtitle: '童年或早期记忆',
+    year: '上世纪末', medium: '油彩、蜡笔、回忆',
+    cover: 'cv-growth-childhood',
+    epigraph: '好奇心最初的样子，是把东西拆开，却装不回去。',
+    excerpt: '所有后来的远行，都始于一只掷出窗外的纸飞机。',
+    body: [
+      '蓝色的天空占据画面大半，一只白色纸飞机正脱手而出。这幅画关于好奇心最早的样子：拆开又装不回去的玩具、第一次问出"为什么"却没有人能回答的下午、对世界尽头的执着想象。',
+      '（占位内容：此处替换为一段真实的童年片段。遵循"选择性真诚"——讲述感受与场景，不涉及敏感关系与精确地址。）'
+    ],
+    images: ['照片占位 · 童年的院子'],
+    highlights: [],
+    links: []
+  },
+  {
+    id: 'growth-student', gallery: 'growth',
+    title: '晚自习的灯', subtitle: '学生阶段',
+    year: '少年时代', medium: '油彩、暗色调',
+    cover: 'cv-growth-student',
+    epigraph: '安静的积累不发出声音，但它在改变地基。',
+    excerpt: '深蓝的夜里只有一盏灯亮着，那是漫长积累期的肖像。',
+    body: [
+      '画面几乎全部沉在深蓝色里，只有一团暖黄的灯光。学生阶段是一段漫长而安静的积累期：考试、朋友、深夜的台灯，以及第一次模糊地意识到"我好像擅长这个"。那盏灯下发生的事情，决定了后来很多岔路口的选择。',
+      '（占位内容：此处替换为真实的学生阶段故事与感想。）'
+    ],
+    images: ['照片占位 · 教室或书桌'],
+    highlights: [],
+    links: []
+  },
+  {
+    id: 'growth-turning-point', gallery: 'growth',
+    title: '转折点', subtitle: '一次重要转折',
+    year: '某一年', medium: '油彩、刮刀、对角线',
+    cover: 'cv-growth-turning',
+    epigraph: '有些决定当时看是裂缝，回头看是门。',
+    excerpt: '一道橙红色的线把画面劈成两半：之前，与之后。',
+    body: [
+      '深色与浅色在对角线两侧对峙，中间是一道无法忽视的橙红。每个人都有这样一个时刻——一次换方向的决定、一次失败或一次告别——它把人生切成"之前"与"之后"。这幅画不渲染戏剧性，只承认：我从那条线上走过来了，并且因此成为现在的我。',
+      '（占位内容：此处替换为一次真实的重要转折——决定、过程与它带来的改变。）'
+    ],
+    images: [],
+    highlights: [],
+    links: []
+  },
+  {
+    id: 'growth-reflection', gallery: 'growth',
+    title: '此刻的镜子', subtitle: '当前阶段的反思',
+    year: '现在进行时', medium: '油彩、镜面、灰绿色',
+    cover: 'cv-growth-reflection',
+    epigraph: '看清自己不是终点，是每天的练习。',
+    excerpt: '镜子里的形象是模糊的，因为"现在"永远没有定稿。',
+    body: [
+      '一面边缘柔和的镜子悬在灰绿色的雾里。这幅画关于现在的我如何看待工作、学习与生活的平衡：正在练习什么（比如把事情做完而不是做多），正在放下什么（比如对所有机会都说"是"的冲动）。',
+      '（占位内容：此处替换为当前阶段的真实反思。）'
+    ],
+    images: [],
+    highlights: [],
+    links: []
+  },
+  {
+    id: 'growth-future', gallery: 'growth',
+    title: '未抵达的远方', subtitle: '面向未来的目标',
+    year: '未来时', medium: '油彩、地平线、晨光',
+    cover: 'cv-growth-future',
+    epigraph: '目标不是终点的坐标，是出发的方向。',
+    excerpt: '地平线上有一道光，路还很长，但方向是亮的。',
+    body: [
+      '画面下方是尚在夜色中的大地，上方是即将到来的晨光。这幅画陈列我的目标：三年尺度上想做成的事、十年尺度上想成为的人，以及打算用什么样的节奏走过去。它被有意画得未完成——和回声厅那幅画遥相呼应。',
+      '（占位内容：此处替换为真实的短期与长期目标。）'
+    ],
+    images: [],
+    highlights: ['三年目标（占位）', '十年方向（占位）', '正在为此做的事（占位）'],
+    links: []
+  },
+
+  /* ---------------- 学习馆 ---------------- */
+  {
+    id: 'learning-interests', gallery: 'learning',
+    title: '兴趣星图', subtitle: '当前兴趣地图',
+    year: '本年度', medium: '星图、丝线、磷光颜料',
+    cover: 'cv-learning-interests',
+    excerpt: '兴趣不是清单，是一张彼此引力可见的星图。',
+    body: [
+      '深蓝的夜幕上散落着大小不一的星，星与星之间有细线相连。每颗星是一个正在投入时间的领域，连线则是它们之间真实发生过的化学反应——一个领域的方法被借去解决另一个领域的问题。',
+      '（占位内容：此处替换为真实的兴趣领域，例如：编程与工程、阅读与写作、某项运动、某种艺术形式，并说明它们如何互相滋养。）'
+    ],
+    images: [],
+    highlights: ['兴趣领域一（占位）', '兴趣领域二（占位）', '兴趣领域三（占位）', '它们之间的连线（占位）'],
+    links: []
+  },
+  {
+    id: 'learning-resources', gallery: 'learning',
+    title: '公共书架', subtitle: '常用学习网站与资料',
+    year: '持续更新', medium: '书脊、网址、分类标签',
+    cover: 'cv-learning-resources',
+    excerpt: '我把常去的地方排成一排书脊，欢迎抽走任何一本。',
+    body: [
+      '一整面书墙，每道色块是一类资源。这里保留来源、分类与访问链接——这是学习馆里唯一鼓励观众"伸手触摸"的作品。',
+      '（占位内容：以下为示例性的公共资源，替换或扩充为你真实常用的网站、课程、播客与书单。）'
+    ],
+    images: [],
+    highlights: ['技术参考：MDN Web Docs（Web 技术权威文档）', '学术前沿：arXiv（论文预印本平台）', '通识入口：Wikipedia（多语言百科）', '课程平台、播客与书单（占位）'],
+    links: [
+      { label: 'MDN Web Docs', href: 'https://developer.mozilla.org' },
+      { label: 'arXiv', href: 'https://arxiv.org' },
+      { label: 'Wikipedia', href: 'https://www.wikipedia.org' }
+    ]
+  },
+  {
+    id: 'learning-method', gallery: 'learning',
+    title: '工作台', subtitle: '方法论与学习流程',
+    year: '反复打磨', medium: '图纸、铅笔、四步循环',
+    cover: 'cv-learning-method',
+    excerpt: '方法不是教条，是一张被用旧的工作台。',
+    body: [
+      '一张铺着横线纸的工作台，左侧有一道红色的装订线。我的学习流程是一个四步循环：输入（带着问题读）、消化（用自己的话重写）、输出（做成东西或讲给别人）、回顾（定期回到旧笔记淘汰过时认知）。',
+      '（占位内容：此处替换为真实使用的方法论细节与工具链，例如笔记软件、间隔重复、项目驱动学习等。）'
+    ],
+    images: [],
+    highlights: ['输入：带着问题读（占位）', '消化：用自己的话重写（占位）', '输出：做成东西或讲出来（占位）', '回顾：定期淘汰过时认知（占位）'],
+    links: []
+  },
+  {
+    id: 'learning-knowledge-base', gallery: 'learning',
+    title: '索引之屋', subtitle: '个人知识库入口',
+    year: '长期工程', medium: '网格、暗房、一扇亮窗',
+    cover: 'cv-learning-kb',
+    excerpt: '知识库是一座暗房，索引是那扇亮着的窗。',
+    body: [
+      '深绿色的网格代表知识库的结构，唯一的亮窗是它的入口。知识库内容以主题索引和精选笔记呈现：不是全部笔记的堆放，而是经过筛选、对他人也可能有用的部分。',
+      '（占位内容：知识库发布后，在此放置主题索引与入口链接。）'
+    ],
+    images: [],
+    highlights: ['主题索引（占位）', '精选笔记若干篇（占位）'],
+    links: [{ label: '知识库入口（占位）', href: '#learning-knowledge-base' }]
+  }
+];
+
+const HERO = {
+  id: 'hero',
+  welcome: '你好，欢迎你来。',
+  manifesto: '这里不是一份简历，而是我的个人空间——往下慢慢走，灯会一盏一盏亮起来，我把我的故事一段一段讲给你听。',
+  note: '五个空间 · 十三幅作品 · 大约五分钟',
+  photo: '照片占位 · 这是我',
+  photoCap: '某个晴天的我（占位）',
+  chips: [
+    { k: '坐标', v: '城市 · 占位' },
+    { k: '身份', v: '职业身份 · 占位' },
+    { k: '最近', v: '正在做的事 · 占位' }
+  ]
+};
+
+const ECHO = {
+  id: 'echo',
+  title: '未完成', subtitle: '未来仍在继续',
+  year: '∞', medium: '画布、留白、时间',
+  email: 'jialiangyang261@gmail.com',
+  photo: '照片占位 · 感谢来访',
+  photoCap: '感谢来访（占位）',
+  body: '展览的最后一幅画被有意留下大片空白——因为接下来的部分，也许有你的参与。',
+  socials: [
+    { label: '社交账号（占位）', href: '#echo' },
+    { label: '简历下载（占位）', href: '#echo' }
+  ]
+};
+
+</script>
+
+<script>
+
+'use strict';
+/* ============================================================
+   空间运行时 V6
+   动线含前后左右：位姿相机（位置+朝向）· 作品挂墙 · 相机对画
+   外立面 → 序厅 → 总览 → (门厅+作品)×4 → 回声厅
+   性能：传送带式走廊平面（小纹理）· 增量写入 · 空闲休眠
+   ============================================================ */
+(function () {
+  document.documentElement.classList.remove('no-js');
+  const matchMQ = q => (window.matchMedia ? window.matchMedia(q) : { matches: false });
+
+  /* ---------- 房间主题（含室外） ---------- */
+  const ROOMS = {
+    facade:   { mode: 'dark',  bg: [16, 18, 22],   floor: '#15171b', ceil: '#0e1014', wall: '#13151a', accent: '#c8b27a' },
+    entry:    { mode: 'light', bg: [236, 233, 227], floor: '#d9d5cb', ceil: '#f4f2ec', wall: '#edeae2', accent: '#8a7a55' },
+    resume:   { mode: 'light', bg: [225, 228, 232], floor: '#c6cbd3', ceil: '#eef0f3', wall: '#e3e6eb', accent: '#3f5a78' },
+    growth:   { mode: 'dark',  bg: [26, 20, 15],    floor: '#241c14', ceil: '#16110c', wall: '#1f1812', accent: '#d8a263' },
+    learning: { mode: 'light', bg: [238, 237, 229], floor: '#d9d7c8', ceil: '#f4f3ea', wall: '#ecebdf', accent: '#33705d' },
+    echo:     { mode: 'dark',  bg: [10, 10, 13],    floor: '#101016', ceil: '#0a0a0e', wall: '#0e0e13', accent: '#9aa0c0' }
+  };
+  const modeOf = gid => ROOMS[gid].mode;
+
+  const FACADE = {
+    kicker: 'PERSONAL MUSEUM',
+    name: '嘉亮的空间',
+    sub: "JIALIANG'S SPACE · 一个人的常设展",
+    note: '常年开放 · 免票 · 欢迎来访'
+  };
+
+  /* ---------- 场景表 ---------- */
+  const SCENES = [
+    { type: 'facade', id: 'facade', gallery: 'facade' },
+    { type: 'hero', id: 'hero', gallery: 'entry' },
+    { type: 'overview', id: 'overview', gallery: 'entry' }
+  ];
+  ['resume', 'growth', 'learning', 'echo'].forEach(gid => {
+    const h = HALLS.find(x => x.id === gid);
+    SCENES.push({ type: 'gate', id: 'gate-' + gid, gallery: gid, hall: h });
+    WORKS.filter(w => w.gallery === gid).forEach(w =>
+      SCENES.push({ type: 'work', id: w.id, gallery: gid, work: w }));
+    if (gid === 'echo') SCENES.push({ type: 'echo', id: 'echo', gallery: 'echo' });
+  });
+  const TOTAL = SCENES.length;
+  const hallName = gid => (HALLS.find(h => h.id === gid) || {}).name || '';
+  const firstIndexOfHall = gid => SCENES.findIndex(s => s.gallery === gid);
+  const workNo = w => String(WORKS.indexOf(w) + 1).padStart(2, '0');
+  const galOfScene = i => SCENES[Math.max(0, Math.min(TOTAL - 1, i))].gallery;
+
+  /* ---------- 空间参数与路径：前后左右的动线 ---------- */
+  const STEP = 1250;             /* 相邻站点的世界间距 */
+  const VIEW = 620;              /* 居中内容在站点前方的距离 */
+  const D2R = Math.PI / 180;
+  const segLen = () => Math.max(560, window.innerHeight * 1.05);
+
+  /* 每一段路的走向：0 = 向内直行，-90 = 向右转。
+     序厅长廊直行 → 成长馆右转向东 → 学习馆左转回北 → 回声厅再右转 */
+  const segDirs = [];
+  for (let i = 0; i < TOTAL - 1; i++) segDirs.push(i < 8 ? 0 : i < 14 ? -90 : i < 19 ? 0 : -90);
+  const hX = d => -Math.sin(d * D2R), hZ = d => -Math.cos(d * D2R); /* 前进方向 */
+  const rX = d => Math.cos(d * D2R),  rZ = d => -Math.sin(d * D2R); /* 右手方向 */
+
+  /* 各站点的世界坐标 */
+  const POS = [{ x: 0, z: 0 }];
+  for (let i = 1; i < TOTAL; i++) {
+    const d = segDirs[i - 1];
+    POS.push({ x: POS[i - 1].x + hX(d) * STEP, z: POS[i - 1].z + hZ(d) * STEP });
+  }
+  /* 各站点的行进朝向：转角（门厅）处取斜 45°，门斜对来路 */
+  const LEGYAW = SCENES.map((sc, i) =>
+    (segDirs[Math.max(0, i - 1)] + segDirs[Math.min(TOTAL - 2, i)]) / 2);
+  const CORNERS = [];
+  for (let i = 1; i < TOTAL - 1; i++) if (segDirs[i - 1] !== segDirs[i]) CORNERS.push(i);
+  /* 作品一律挂在行进方向右侧的墙上 */
+  const sideOf = i => (SCENES[i].type === 'work' ? 1 : 0);
+
+  /* 随视口变化的几何量（relayout 时重算） */
+  const geo = { CW: 640, LATP: 520, F: 520, AIM: 45, TILT: 23, floorY: 320, ceilY: 300, wallH: 1000, camYaw: [], anchor: [] };
+  function computeGeo() {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    geo.LATP = Math.min(520, vw * .42);          /* 画到走道中线的横距 */
+    geo.F = 520;                                  /* 画在站点前方的纵距 */
+    geo.CW = geo.LATP + 120;                      /* 走廊半宽：墙在画后 */
+    geo.AIM = Math.atan2(geo.LATP, geo.F) / D2R;  /* 看画时的转头角 */
+    geo.TILT = 68 - geo.AIM;                      /* 画相对墙的外倾角（保证近正视） */
+    geo.floorY = Math.max(230, Math.min(vh * .44, 380));
+    geo.ceilY = Math.max(210, Math.min(vh * .42, 340));
+    geo.wallH = Math.round(vh * 1.3);
+    geo.camYaw = SCENES.map((sc, i) => LEGYAW[i] - sideOf(i) * geo.AIM);
+    geo.anchor = SCENES.map((sc, i) => {
+      const ly = LEGYAW[i], p0 = POS[i];
+      if (sc.type === 'work') {
+        return {
+          x: p0.x + hX(ly) * geo.F + rX(ly) * geo.LATP,
+          z: p0.z + hZ(ly) * geo.F + rZ(ly) * geo.LATP,
+          rot: ly - 90 + geo.TILT
+        };
+      }
+      const v = sc.type === 'facade' ? 990 : VIEW;
+      const cy = geo.camYaw[i];
+      return { x: p0.x + hX(cy) * v, z: p0.z + hZ(cy) * v, rot: cy };
+    });
+  }
+
+  /* 连续位姿：位置沿折线行走，朝向平滑插值 */
+  function poseAt(p) {
+    const i = Math.max(0, Math.min(TOTAL - 2, Math.floor(p)));
+    const fr = Math.max(0, Math.min(1, p - i));
+    const sm = fr * fr * (3 - 2 * fr);
+    return {
+      x: POS[i].x + (POS[i + 1].x - POS[i].x) * fr,
+      z: POS[i].z + (POS[i + 1].z - POS[i].z) * fr,
+      yaw: geo.camYaw[i] + (geo.camYaw[i + 1] - geo.camYaw[i]) * sm
+    };
+  }
+
+  /* ---------- 状态 ---------- */
+  const state = { index: 0, soundOn: false, reduced: matchMQ('(prefers-reduced-motion: reduce)').matches };
+
+  /* ---------- DOM ---------- */
+  const $ = s => document.querySelector(s);
+  const world = $('#main'), viewport = $('#viewport'), scrollSpace = $('#scroll-space');
+  const hudCount = $('#hud-count'), progress = $('#progress'), progressBar = $('#progress-bar');
+  const closeup = $('#closeup'), closeupScroll = $('#closeup-scroll');
+  const btnSound = $('#btn-sound'), scrollCue = $('#scroll-cue'), hallsNav = $('#halls-nav');
+
+  const esc = s => String(s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* ============================================================
+     展馆几何体：按路段静态生成的地面 / 天花 / 墙体
+     —— transform 与颜色只在 relayout 时写一次；
+        每帧仅按与相机的路程距离做可见性剔除。
+     ============================================================ */
+  const arch = []; /* {el, kind, j, mid, d, junction} */
+  const FLOOR_GRID =
+    'repeating-linear-gradient(to bottom,rgba(0,0,0,.1) 0 2px,transparent 2px 125px),' +
+    'repeating-linear-gradient(to right,rgba(0,0,0,.06) 0 1px,transparent 1px 125px)';
+
+  function addPlane(kind, j, mid, d, color, junction) {
+    const el = document.createElement('div');
+    el.className = 'plane plane-' + kind;
+    el.setAttribute('aria-hidden', 'true');
+    el.style.backgroundColor = color;
+    if (kind === 'floor') el.style.backgroundImage = FLOOR_GRID;
+    world.appendChild(el);
+    arch.push({ el, kind, j, mid, d, junction: !!junction, lastVis: null });
+  }
+
+  function buildArch() {
+    for (let j = 0; j < TOTAL - 1; j++) {
+      const d = segDirs[j];
+      const a = POS[j], b = POS[j + 1];
+      const m = { x: (a.x + b.x) / 2, z: (a.z + b.z) / 2 };
+      const room = ROOMS[j === 0 ? 'facade' : SCENES[j + 1].gallery];
+      const outdoor = j === 0; /* 馆外前庭：只有夜色广场地面 */
+      addPlane('floor', j, m, d, room.floor);
+      if (!outdoor) {
+        addPlane('ceil', j, m, d, room.ceil);
+        addPlane('wallL', j, m, d, room.wall);
+        addPlane('wallR', j, m, d, room.wall);
+      }
+    }
+    /* 转角处补一块方形地面/天花，封住直角接缝 */
+    CORNERS.forEach(i => {
+      const room = ROOMS[SCENES[i].gallery];
+      addPlane('floor', i - .5, POS[i], 0, room.floor, true);
+      addPlane('ceil', i - .5, POS[i], 0, room.ceil, true);
+    });
+  }
+
+  function layoutArch() {
+    arch.forEach(it => {
+      const st = it.el.style, d = it.d;
+      if (it.kind === 'floor' || it.kind === 'ceil') {
+        const w = it.junction ? 2 * geo.CW + 8 : 2 * geo.CW;
+        const h = it.junction ? 2 * geo.CW + 8 : STEP;
+        const y = (it.kind === 'floor' ? geo.floorY : -geo.ceilY) + (it.junction ? (it.kind === 'floor' ? 1 : -1) : 0);
+        st.width = w + 'px'; st.height = h + 'px';
+        st.transform = 'translate(-50%,-50%) translate3d(' + it.mid.x + 'px,' + y + 'px,' + it.mid.z +
+          'px) rotateY(' + d + 'deg) rotateX(-90deg)';
+      } else {
+        const s = it.kind === 'wallL' ? -1 : 1;
+        const wx = it.mid.x + rX(d) * s * geo.CW, wz = it.mid.z + rZ(d) * s * geo.CW;
+        st.width = STEP + 'px'; st.height = geo.wallH + 'px';
+        st.transform = 'translate(-50%,-50%) translate3d(' + wx + 'px,0,' + wz +
+          'px) rotateY(' + (d - s * 90) + 'deg)';
+      }
+    });
+  }
+
+  function archFrame(p) {
+    arch.forEach(it => {
+      const vis = Math.abs(p - (it.j + .5)) < 3.2;
+      if (vis !== it.lastVis) { it.el.style.visibility = vis ? 'visible' : 'hidden'; it.lastVis = vis; }
+    });
+  }
+
+  /* ============================================================
+     渲染场景
+     ============================================================ */
+  const items = [];
+
+  function polaroidHTML(label, cap, extra) {
+    return '<div class="polaroid' + (extra ? ' ' + extra : '') + '">' +
+      '<span class="shot" role="img" aria-label="' + esc(label) + '">' + esc(label) + '</span>' +
+      '<span class="cap">' + esc(cap || label) + '</span></div>';
+  }
+  function quicklinksHTML(w) {
+    const links = (w.links || []).map(l =>
+      '<a href="' + esc(l.href) + '"' + (/^https?:/.test(l.href) ? ' rel="noopener" target="_blank"' : '') + '>' + esc(l.label) + '</a>').join('');
+    return links ? '<div class="quicklinks">' + links + '</div>' : '';
+  }
+
+  function renderScenes() {
+    SCENES.forEach((sc, i) => {
+      const room = ROOMS[sc.gallery];
+      const sec = document.createElement('section');
+      sec.className = 'exhibit exhibit-' + sc.type + ' in-' + room.mode;
+      sec.id = 'ex-' + sc.id;
+      sec.style.setProperty('--acc', room.accent);
+      sec.style.setProperty('--wall', room.wall);
+
+      if (sc.type === 'facade') {
+        sec.setAttribute('aria-label', '入口 · 建筑外立面');
+        sec.innerHTML =
+          '<div class="facade">' +
+          '<p class="f-kicker">' + esc(FACADE.kicker) + '</p>' +
+          '<div class="f-building" aria-hidden="true">' +
+          '<div class="f-pediment"></div>' +
+          '<div class="f-frieze"><span>' + esc(FACADE.name) + '</span></div>' +
+          '<div class="f-colonnade">' +
+          '<span class="f-col"></span><span class="f-col"></span><span class="f-col"></span>' +
+          '<div class="f-door"><span class="f-light"></span></div>' +
+          '<span class="f-col"></span><span class="f-col"></span><span class="f-col"></span>' +
+          '</div>' +
+          '<div class="f-stairs"><i></i><i></i><i></i></div>' +
+          '<span class="f-wing wl"></span><span class="f-wing wr"></span>' +
+          '</div>' +
+          '<h1 class="f-name">' + esc(FACADE.name) + '</h1>' +
+          '<p class="f-sub">' + esc(FACADE.sub) + '</p>' +
+          '<button class="btn-line f-enter" data-action="enter">拾级而上 · 推门而入 ↓</button>' +
+          '<p class="f-note">' + esc(FACADE.note) + '</p>' +
+          '</div>';
+
+      } else if (sc.type === 'hero') {
+        sec.setAttribute('aria-label', '序厅');
+        sec.innerHTML =
+          '<div class="deco-frame l1" aria-hidden="true"></div><div class="deco-frame l2" aria-hidden="true"></div>' +
+          '<div class="deco-frame r1" aria-hidden="true"></div><div class="deco-frame r2" aria-hidden="true"></div>' +
+          '<div class="wall">' +
+          '<p class="hero-kicker">序厅 · 你已在馆内</p>' +
+          '<h2 class="welcome">' + esc(HERO.welcome) + '</h2>' +
+          '<hr class="hero-rule">' +
+          '<p class="manifesto">' + esc(HERO.manifesto) + '</p>' +
+          '<div class="hero-meta">' +
+          polaroidHTML(HERO.photo, HERO.photoCap) +
+          '<div class="chips">' +
+          HERO.chips.map(c => '<p class="chip"><b>' + esc(c.k) + '</b>' + esc(c.v) + '</p>').join('') +
+          '</div></div>' +
+          '<div class="hero-actions">' +
+          '<button class="btn-line" data-action="enter">往里走 ↓</button>' +
+          '<button class="btn-line" data-action="sound-hero" aria-pressed="false">环境声 · 关</button>' +
+          '</div>' +
+          '<p class="note">' + esc(HERO.note) + '</p>' +
+          '</div>';
+
+      } else if (sc.type === 'overview') {
+        sec.setAttribute('aria-label', '空间总览');
+        const gatesHTML = HALLS.map((h, k) => {
+          const r = ROOMS[h.id];
+          const n = WORKS.filter(w => w.gallery === h.id).length;
+          const cnt = h.id === 'entry' ? '入口' : (h.id === 'echo' ? '终幅' : n + ' 件作品');
+          const off = k - 2;
+          const tf = 'translate(-50%,-50%) translateX(calc(var(--ovsp) * ' + off + ')) ' +
+            'translateZ(' + (-Math.abs(off) * 110) + 'px) rotateY(' + (-off * 9) + 'deg)';
+          return '<button class="ov-gate in-' + r.mode + '" data-hall="' + h.id + '"' +
+            ' style="--acc:' + r.accent + ';--wall:' + r.wall + ';transform:' + tf + '"' +
+            ' aria-label="进入' + esc(h.name) + '：' + esc(h.theme) + '">' +
+            '<span class="g-no">0' + (k + 1) + '</span>' +
+            '<span class="g-name">' + esc(h.name) + '</span>' +
+            '<span class="g-theme">' + esc(h.theme) + '</span>' +
+            '<span class="g-count">' + esc(cnt) + '</span>' +
+            '<span class="g-enter">进入 →</span></button>';
+        }).join('');
+        sec.innerHTML =
+          '<div class="ovwrap">' +
+          '<p class="ov-kicker">空间总览</p>' +
+          '<h2 class="ov-title">五个空间，一条路</h2>' +
+          '<p class="ov-sub">点开任意一扇门直接进入；或继续向下，沿着走廊一间一间慢慢看。</p>' +
+          '<div class="ov-gates">' + gatesHTML + '</div></div>';
+
+      } else if (sc.type === 'gate') {
+        const h = sc.hall;
+        const no = ['resume', 'growth', 'learning', 'echo'].indexOf(h.id) + 2;
+        sec.setAttribute('aria-label', '步入' + h.name);
+        sec.innerHTML =
+          '<div class="gatewrap">' +
+          '<span class="gate-wing wl" aria-hidden="true"></span>' +
+          '<span class="gate-wing wr" aria-hidden="true"></span>' +
+          '<div class="gate-frame">' +
+          '<p class="g-kicker">第 ' + no + ' 空间</p>' +
+          '<h2 class="g-name">' + esc(h.name) + '</h2>' +
+          '<p class="g-theme">' + esc(h.theme) + '</p>' +
+          '<p class="g-cue">继续向下 · 步入</p>' +
+          '</div></div>';
+
+      } else if (sc.type === 'echo') {
+        sec.setAttribute('aria-label', '回声厅');
+        sec.innerHTML =
+          '<div class="wall">' +
+          '<button class="painting" data-action="closeup-echo" aria-label="近观《' + esc(ECHO.title) + '》：' + esc(ECHO.subtitle) + '">' +
+          '<span class="canvas"><span class="cv cv-echo" role="img" aria-label="一幅刻意留白的未完成油画，一道深色笔触停在画布中央"></span></span>' +
+          '<span class="hint" aria-hidden="true">点击近观</span></button>' +
+          '<div class="panel">' +
+          polaroidHTML(ECHO.photo, ECHO.photoCap) +
+          '<p class="no">回声厅 · 终幅</p>' +
+          '<h2>《' + esc(ECHO.title) + '》</h2>' +
+          '<p class="sub">' + esc(ECHO.subtitle) + '</p>' +
+          '<p class="meta">' + esc(ECHO.year) + ' · ' + esc(ECHO.medium) + '</p>' +
+          '<hr class="rule">' +
+          '<p class="excerpt">' + esc(ECHO.body) + '</p>' +
+          '<div class="quicklinks">' +
+          '<a href="mailto:' + esc(ECHO.email) + '">写信给我</a>' +
+          '<button data-action="copy-email">复制邮箱</button>' +
+          ECHO.socials.map(s => '<a href="' + esc(s.href) + '">' + esc(s.label) + '</a>').join('') +
+          '<button data-action="back-top">回到大门 ↑</button>' +
+          '</div>' +
+          '<p class="copied-tip" aria-live="polite"></p>' +
+          '</div></div>';
+
+      } else {
+        const w = sc.work;
+        sec.setAttribute('aria-label', hallName(w.gallery) + ' · ' + w.title);
+        const keys = (w.highlights || []).slice(0, 3).map(h => '<li>' + esc(h) + '</li>').join('');
+        sec.innerHTML =
+          '<div class="wall">' +
+          '<button class="painting" data-work="' + esc(w.id) + '" aria-haspopup="dialog" ' +
+          'aria-label="近观第 ' + workNo(w) + ' 件作品《' + esc(w.title) + '》：' + esc(w.subtitle) + '，查看作品背后的思考与故事">' +
+          '<span class="canvas"><span class="cv ' + esc(w.cover) + '" role="img" aria-label="作品《' + esc(w.title) + '》的画面：' + esc(w.excerpt) + '"></span></span>' +
+          '<span class="hint" aria-hidden="true">点击近观</span></button>' +
+          '<div class="panel">' +
+          (w.images && w.images.length ? polaroidHTML(w.images[0], w.images[0].replace(/^[^·]*· ?/, '')) : '') +
+          '<p class="no">' + esc(hallName(w.gallery)) + ' · NO.' + workNo(w) + '</p>' +
+          '<h2>《' + esc(w.title) + '》</h2>' +
+          '<p class="sub">' + esc(w.subtitle) + '</p>' +
+          '<p class="meta">' + esc(w.year) + ' · ' + esc(w.medium) + '</p>' +
+          '<hr class="rule">' +
+          '<p class="excerpt">' + esc(w.excerpt) + '</p>' +
+          (keys ? '<ul class="keylist">' + keys + '</ul>' : '') +
+          quicklinksHTML(w) +
+          '<button class="more" data-work="' + esc(w.id) + '">作品背后的思考 →</button>' +
+          '</div></div>';
+      }
+
+      world.appendChild(sec);
+      /* 前方可见的路程（按场景数）：门厅远远可见，作品走近才清晰 */
+      const ahead = sc.type === 'gate' ? 2.1 :
+        (sc.type === 'overview' || sc.type === 'hero' ? 1.5 : 1.05);
+      items.push({ el: sec, type: sc.type, i, ahead, lastOp: -1, lastVis: null, lastNear: null });
+    });
+  }
+
+  /* 静态 transform 只在布局变化时写一次 */
+  function relayout() {
+    computeGeo();
+    layoutArch();
+    const sp = Math.min(window.innerWidth * .19, 240);
+    items.forEach(it => {
+      const a = geo.anchor[it.i];
+      it.el.style.transform = 'translate(-50%,-50%) translate3d(' + a.x.toFixed(1) + 'px,0,' +
+        a.z.toFixed(1) + 'px) rotateY(' + a.rot.toFixed(2) + 'deg)';
+      if (it.type === 'overview') it.el.style.setProperty('--ovsp', sp + 'px');
+    });
+    scrollSpace.style.height = state.reduced ? '0px'
+      : Math.round(segLen() * (TOTAL - 1) + window.innerHeight) + 'px';
+  }
+
+  /* ============================================================
+     相机：滚动推进 + 房间底色插值 + 空闲休眠
+     ============================================================ */
+  let camX = 0, camZ = 0, camYawD = 0, camInit = false, rafOn = false;
+  let lastY = -1, idleFrames = 0;
+  let lastBg = '', lastMode = '', lastProg = -1, lastCue = null;
+  const lerpC = (a, b, t) => Math.round(a + (b - a) * t);
+
+  function frame() {
+    if (state.reduced) { rafOn = false; return; }
+    const y = window.scrollY;
+    const p = Math.max(0, Math.min(TOTAL - 1, y / segLen()));
+    const near = Math.max(0, Math.min(TOTAL - 1, Math.round(p)));
+    const t = poseAt(p);
+    if (!camInit) { camX = t.x; camZ = t.z; camYawD = t.yaw; camInit = true; }
+    camX += (t.x - camX) * .16;
+    camZ += (t.z - camZ) * .16;
+    camYawD += (t.yaw - camYawD) * .14;
+    world.style.transform = 'rotateY(' + (-camYawD).toFixed(3) + 'deg) translate3d(' +
+      (-camX).toFixed(2) + 'px,0,' + (-camZ).toFixed(2) + 'px)';
+
+    archFrame(p);
+
+    /* 房间底色插值：推门而入时由夜色转为暖白 */
+    const fi = Math.max(0, Math.min(TOTAL - 1, Math.floor(p)));
+    const fr = Math.max(0, Math.min(1, p - fi));
+    const s = fr * fr * (3 - 2 * fr);
+    const a = ROOMS[galOfScene(fi)].bg, b = ROOMS[galOfScene(fi + 1)].bg;
+    const bg = 'rgb(' + lerpC(a[0], b[0], s) + ',' + lerpC(a[1], b[1], s) + ',' + lerpC(a[2], b[2], s) + ')';
+    if (bg !== lastBg) { viewport.style.backgroundColor = bg; lastBg = bg; }
+    const mode = modeOf(galOfScene(near));
+    if (mode !== lastMode) { document.documentElement.setAttribute('data-room', mode); lastMode = mode; }
+
+    /* 展位：按路程距离增量写入 */
+    items.forEach(it => {
+      const d = p - it.i; /* >0 已走过，<0 在前方 */
+      const ad = Math.abs(d);
+      const span = d < 0 ? Math.max(.2, it.ahead - .45) : .6;
+      let op = ad <= .45 ? 1 : 1 - (ad - .45) / span;
+      op = Math.max(0, Math.min(1, op));
+      if (Math.abs(op - it.lastOp) > .004 || (op === 0) !== (it.lastOp === 0)) {
+        it.el.style.opacity = op.toFixed(3);
+        it.lastOp = op;
+      }
+      const vis = op > .001;
+      if (vis !== it.lastVis) { it.el.style.visibility = vis ? 'visible' : 'hidden'; it.lastVis = vis; }
+      const nearNow = Math.abs(it.i - p) < .6;
+      if (nearNow !== it.lastNear) { it.el.classList.toggle('is-near', nearNow); it.lastNear = nearNow; }
+    });
+
+    if (near !== state.index) { state.index = near; updateHUD(); }
+    const prog = Math.min(100, p / (TOTAL - 1) * 100);
+    if (Math.abs(prog - lastProg) > .15) {
+      progressBar.style.width = prog.toFixed(2) + '%';
+      progress.setAttribute('aria-valuenow', String(Math.round(prog)));
+      lastProg = prog;
+    }
+    const cue = p > .35;
+    if (cue !== lastCue) { scrollCue.style.opacity = cue ? '0' : '1'; lastCue = cue; }
+
+    const moving = Math.abs(y - lastY) > .5;
+    lastY = y;
+    const settled = Math.abs(camX - t.x) < .3 && Math.abs(camZ - t.z) < .3 && Math.abs(camYawD - t.yaw) < .02;
+    idleFrames = (!moving && settled) ? idleFrames + 1 : 0;
+    if (idleFrames > 40) { rafOn = false; return; }
+    requestAnimationFrame(frame);
+  }
+  function startLoop() { if (!rafOn && !state.reduced) { rafOn = true; requestAnimationFrame(frame); } }
+  window.addEventListener('scroll', startLoop, { passive: true });
+
+  /* ---------- HUD ---------- */
+  function updateHUD() {
+    const sc = SCENES[state.index];
+    hallsNav.querySelectorAll('[data-hall]').forEach(b =>
+      b.setAttribute('aria-current', String(b.getAttribute('data-hall') === sc.gallery)));
+    hudCount.textContent =
+      sc.type === 'work' ? 'NO.' + workNo(sc.work) + ' / ' + WORKS.length :
+      sc.type === 'facade' ? '门' :
+      sc.type === 'hero' ? '序' :
+      sc.type === 'overview' ? '览' :
+      sc.type === 'gate' ? sc.hall.name : '终';
+    scheduleHash();
+  }
+
+  /* ---------- 导航 ---------- */
+  function scrollToIndex(i, smooth) {
+    i = Math.max(0, Math.min(TOTAL - 1, i));
+    if (state.reduced) {
+      const el = document.getElementById('ex-' + SCENES[i].id);
+      if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+      state.index = i; updateHUD();
+      return;
+    }
+    window.scrollTo({ top: Math.round(i * segLen()), behavior: smooth === false ? 'auto' : 'smooth' });
+    startLoop();
+  }
+
+  /* ---------- hash 同步 ---------- */
+  let hashTimer = null;
+  function scheduleHash() {
+    clearTimeout(hashTimer);
+    hashTimer = setTimeout(() => {
+      history.replaceState(history.state, '', '#' + SCENES[state.index].id);
+    }, 220);
+  }
+  function indexFromHash() {
+    const id = location.hash.replace(/^#/, '');
+    const i = SCENES.findIndex(s => s.id === id);
+    if (i >= 0) return i;
+    const g = HALLS.find(h => h.id === id);
+    return g ? Math.max(0, firstIndexOfHall(g.id)) : 0;
+  }
+  window.addEventListener('hashchange', () => {
+    const i = indexFromHash();
+    if (i === state.index) return;
+    if (closeupOpen) closeCloseup(false);
+    scrollToIndex(i);
+  });
+
+  /* ---------- 键盘 ---------- */
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { if (closeupOpen) { e.preventDefault(); closeCloseup(true); } return; }
+    if (closeupOpen) { trapFocus(e); return; }
+    const tgt = e.target;
+    if (tgt && (tgt.tagName === 'INPUT' || tgt.tagName === 'TEXTAREA')) return;
+    switch (e.key) {
+      case 'ArrowDown': case 'PageDown':
+        e.preventDefault(); scrollToIndex(state.index + 1); break;
+      case 'ArrowUp': case 'PageUp':
+        e.preventDefault(); scrollToIndex(state.index - 1); break;
+      case 'Home': e.preventDefault(); scrollToIndex(0); break;
+      case 'End': e.preventDefault(); scrollToIndex(TOTAL - 1); break;
+    }
+  });
+
+  /* ============================================================
+     近观模式：适配视口的固定面板 + 可折叠长内容
+     ============================================================ */
+  let closeupOpen = false, lastFocus = null, closeTimer = null;
+
+  function foldHTML(summary, inner, open) {
+    return '<details class="fold"' + (open ? ' open' : '') + '><summary>' + summary + '</summary>' +
+      '<div class="fold-body">' + inner + '</div></details>';
+  }
+
+  function renderCloseup(w) {
+    const isEcho = !w.gallery;
+    const no = isEcho ? '回声厅 · 终幅' : esc(hallName(w.gallery)) + ' · NO.' + workNo(w);
+    const paras = isEcho ? [ECHO.body] : (w.body || []);
+    let html = '<div class="closeup-panel">' +
+      '<button class="closeup-close" data-action="close-closeup" aria-label="关闭近观（Esc）">✕</button>' +
+      '<div class="closeup-art" aria-hidden="true"><span class="cv ' + (isEcho ? 'cv-echo' : esc(w.cover)) + '"></span>' +
+      '<div class="closeup-head"><p class="no">' + no + '</p>' +
+      '<h2 id="closeup-title">《' + esc(w.title) + '》</h2>' +
+      '<p class="sub">' + esc(w.subtitle) + ' · ' + esc(w.year) + ' · ' + esc(w.medium) + '</p></div></div>' +
+      '<div class="closeup-body">';
+    if (w.epigraph) html += '<p class="epigraph">题记 — ' + esc(w.epigraph) + '</p>';
+
+    /* 正文：先读两段，其余折叠 */
+    paras.slice(0, 2).forEach(p => { html += '<p>' + esc(p) + '</p>'; });
+    const rest = paras.slice(2);
+    if (rest.length) {
+      html += foldHTML('继续读下去 · 还有 ' + rest.length + ' 段',
+        rest.map(p => '<p>' + esc(p) + '</p>').join(''));
+    }
+    if (!isEcho && w.highlights && w.highlights.length) {
+      html += foldHTML('要点速览 · ' + w.highlights.length + ' 条',
+        '<ul class="highlights">' + w.highlights.map(h => '<li>' + esc(h) + '</li>').join('') + '</ul>', true);
+    }
+    if (!isEcho && w.images && w.images.length) {
+      html += foldHTML('现场图记 · ' + w.images.length + ' 张',
+        '<div class="closeup-gallery">' +
+        w.images.map(label => '<div class="ph" role="img" aria-label="' + esc(label) + '">' + esc(label) + '</div>').join('') + '</div>');
+    }
+    if (isEcho) {
+      html += '<div class="closeup-links"><a href="mailto:' + esc(ECHO.email) + '">' + esc(ECHO.email) + '</a>' +
+        ECHO.socials.map(s => '<a href="' + esc(s.href) + '">' + esc(s.label) + '</a>').join('') + '</div>';
+    } else if (w.links && w.links.length) {
+      html += '<div class="closeup-links">' +
+        w.links.map(l => '<a href="' + esc(l.href) + '"' + (/^https?:/.test(l.href) ? ' rel="noopener" target="_blank"' : '') + '>' + esc(l.label) + ' ↗</a>').join('') + '</div>';
+    }
+    html += '<div class="closeup-nav">' +
+      '<button data-action="close-closeup">← 退后一步，回到画前</button>' +
+      (isEcho ? '' : '<button data-action="closeup-next">走向下一件 →</button>') +
+      '</div></div></div>';
+    closeupScroll.innerHTML = html;
+  }
+
+  function openCloseup(w, opener) {
+    clearTimeout(closeTimer);
+    renderCloseup(w);
+    lastFocus = opener || document.activeElement;
+    closeup.hidden = false;
+    closeup.classList.remove('is-closing');
+    closeup.classList.add('is-open');
+    closeupOpen = true;
+    document.body.style.overflow = 'hidden';
+    history.pushState({ closeup: true }, '');
+    closeup.querySelector('.closeup-close').focus();
+  }
+  function closeCloseup(viaUI) {
+    if (!closeupOpen) return;
+    closeupOpen = false;
+    document.body.style.overflow = '';
+    if (viaUI && history.state && history.state.closeup) history.back();
+    if (lastFocus && document.contains(lastFocus)) lastFocus.focus();
+    if (state.reduced) {
+      closeup.classList.remove('is-open');
+      closeup.hidden = true;
+      return;
+    }
+    closeup.classList.add('is-closing');           /* 丝滑退场 */
+    closeTimer = setTimeout(() => {
+      closeup.classList.remove('is-open', 'is-closing');
+      closeup.hidden = true;
+    }, 200);
+  }
+  window.addEventListener('popstate', () => { if (closeupOpen) closeCloseup(false); });
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const f = closeup.querySelectorAll('button, a[href], summary');
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+
+  /* ============================================================
+     程序化环境声
+     ============================================================ */
+  let audioCtx = null, audioNodes = null;
+  function buildAmbience() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const master = audioCtx.createGain();
+    master.gain.value = 0; master.connect(audioCtx.destination);
+    const len = audioCtx.sampleRate * 4;
+    const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+    const data = buf.getChannelData(0);
+    let lastO = 0;
+    for (let i = 0; i < len; i++) {
+      const white = Math.random() * 2 - 1;
+      lastO = (lastO + .02 * white) / 1.02;
+      data[i] = lastO * 3.5;
+    }
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = buf; noise.loop = true;
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 320; lp.Q.value = .4;
+    const nGain = audioCtx.createGain(); nGain.gain.value = .5;
+    noise.connect(lp); lp.connect(nGain); nGain.connect(master);
+    const droneGain = audioCtx.createGain(); droneGain.gain.value = .05;
+    [108, 162.2].forEach(fq => {
+      const o = audioCtx.createOscillator();
+      o.type = 'sine'; o.frequency.value = fq;
+      const g = audioCtx.createGain(); g.gain.value = .5;
+      o.connect(g); g.connect(droneGain); o.start();
+    });
+    droneGain.connect(master);
+    const lfo = audioCtx.createOscillator(); lfo.frequency.value = .05;
+    const lfoGain = audioCtx.createGain(); lfoGain.gain.value = .12;
+    lfo.connect(lfoGain); lfoGain.connect(nGain.gain); lfo.start();
+    noise.start();
+    audioNodes = { master };
+  }
+  function setSound(on, save) {
+    state.soundOn = on;
+    if (on) {
+      if (!audioCtx) buildAmbience();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      audioNodes.master.gain.setTargetAtTime(.22, audioCtx.currentTime, 1.2);
+    } else if (audioNodes) {
+      audioNodes.master.gain.setTargetAtTime(0, audioCtx.currentTime, .4);
+    }
+    btnSound.textContent = '声 · ' + (on ? '开' : '关');
+    btnSound.setAttribute('aria-pressed', String(on));
+    const heroBtn = document.querySelector('[data-action="sound-hero"]');
+    if (heroBtn) {
+      heroBtn.textContent = '环境声 · ' + (on ? '开' : '关');
+      heroBtn.setAttribute('aria-pressed', String(on));
+    }
+    if (save) { try { sessionStorage.setItem('mh-sound', on ? '1' : '0'); } catch (e) {} }
+  }
+
+  /* ============================================================
+     事件委托
+     ============================================================ */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action], [data-work], [data-hall]');
+    if (!btn) return;
+    if (btn.hasAttribute('data-work')) {
+      const w = WORKS.find(x => x.id === btn.getAttribute('data-work'));
+      if (w) openCloseup(w, btn);
+      return;
+    }
+    if (btn.hasAttribute('data-hall')) {
+      scrollToIndex(Math.max(0, firstIndexOfHall(btn.getAttribute('data-hall'))));
+      return;
+    }
+    switch (btn.getAttribute('data-action')) {
+      case 'enter': scrollToIndex(state.index + 1); break;
+      case 'back-top': scrollToIndex(0); break;
+      case 'close-closeup': closeCloseup(true); break;
+      case 'closeup-next': closeCloseup(true); scrollToIndex(state.index + 1); break;
+      case 'closeup-echo': openCloseup(Object.assign({}, ECHO, { gallery: null }), btn); break;
+      case 'sound-hero': setSound(!state.soundOn, true); break;
+      case 'copy-email': {
+        const tip = document.querySelector('.exhibit-echo .copied-tip');
+        const done = () => { if (tip) { tip.textContent = '已复制：' + ECHO.email; setTimeout(() => { tip.textContent = ''; }, 2600); } };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(ECHO.email).then(done, () => { if (tip) tip.textContent = ECHO.email; });
+        } else if (tip) tip.textContent = ECHO.email;
+        break;
+      }
+    }
+  });
+  btnSound.addEventListener('click', () => setSound(!state.soundOn, true));
+  closeup.addEventListener('click', e => { if (e.target === closeupScroll) closeCloseup(true); });
+
+  /* ---------- 图片加载失败 → 策展式占位 ---------- */
+  document.addEventListener('error', e => {
+    const img = e.target;
+    if (!(img instanceof HTMLImageElement)) return;
+    const ph = document.createElement('div');
+    ph.className = 'ph';
+    ph.textContent = '该图像暂未到馆 · ' + (img.alt || '展品图片');
+    img.replaceWith(ph);
+  }, true);
+
+  /* ---------- 减少动态 ---------- */
+  const rmq = matchMQ('(prefers-reduced-motion: reduce)');
+  function applyReduced() {
+    state.reduced = rmq.matches;
+    document.documentElement.classList.toggle('reduced-motion', rmq.matches);
+    relayout();
+    if (!rmq.matches) startLoop();
+  }
+  if (rmq.addEventListener) rmq.addEventListener('change', applyReduced);
+
+  /* ---------- 启动 ---------- */
+  document.documentElement.setAttribute('data-room', 'dark'); /* 馆外是夜色 */
+  buildArch();
+  renderScenes();
+  applyReduced();
+  window.addEventListener('resize', () => { relayout(); startLoop(); });
+
+  let saved = null;
+  try { saved = sessionStorage.getItem('mh-sound'); } catch (e) {}
+  if (saved === '1') {
+    btnSound.textContent = '声 · 开';
+    btnSound.setAttribute('aria-pressed', 'true');
+    const resume = () => { setSound(true, false); };
+    window.addEventListener('pointerdown', resume, { once: true });
+    window.addEventListener('keydown', resume, { once: true });
+  }
+
+  const init = indexFromHash();
+  state.index = init;
+  updateHUD();
+  if (init > 0) scrollToIndex(init, false);
+  startLoop();
+})();
+
+</script>
+
+</body>
+</html>
