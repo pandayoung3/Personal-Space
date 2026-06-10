@@ -1,2 +1,46 @@
-# Personal-Space
-Personal Space Website
+# Galleon的空间 · Personal Space
+
+一座单文件、零依赖的 3D 个人美术馆网站。打开 `index.html` 即可访问：从夜色中的宏伟外立面拾级而入，沿着会转弯的展线穿过序厅、履历馆、成长馆、学习馆与回声厅，十三幅作品挂在馆墙上等你走近。
+
+## 技术特点
+
+- **单文件**：HTML / CSS / JS 全部在 `index.html` 内，无任何外部依赖与构建步骤
+- **CSS 3D 位姿相机**：滚动驱动「位置 + 朝向」，展线含前后左右转弯
+- **分段静态几何体**：地面 / 天花 / 墙体按路段生成，增量渲染 + 空闲休眠，性能友好
+- **程序化音效**：Web Audio 按展厅主题生成不同声场，切厅平滑渐变（默认静音）
+- **可访问性**：键盘导航、焦点陷阱、`prefers-reduced-motion` 降级、无 JS 可读回退
+
+## 版本管理
+
+每次改版都是一个独立的 git 提交（提交信息以 `v6:`、`v7:` 等开头），可以随时回退。
+
+```bash
+# 查看版本历史
+git log --oneline
+
+# 临时回看某个旧版本
+git checkout <提交号> -- index.html
+
+# 正式回退到某个版本（生成一次新的"回退提交"，历史不丢）
+git revert <要撤销的提交号>
+
+# 回到最新版
+git checkout main -- index.html
+```
+
+## 发布
+
+仓库地址：<https://github.com/pandayoung3/Personal-Space>
+
+后续要绑定域名时，推荐用 **GitHub Pages**：仓库 Settings → Pages → Source 选 `main` 分支根目录，保存后即可获得 `https://pandayoung3.github.io/Personal-Space/` 地址；再在 Pages 设置里填入自定义域名（并在域名服务商处加一条 CNAME 记录指向 `pandayoung3.github.io`）即可。
+
+## 版本历史
+
+- **v7**：品牌更名「Galleon的空间」；外立面放大；总览五厅主题卡片（学习馆小书架等）；作品逐馆左右交替挂墙；门厅与墙体重叠修复；分厅主题音效平滑过渡
+- **v6**：外立面首页；位姿相机转弯展线；作品挂墙、走近显注释；分段静态几何体
+- **v5**：性能重构（传送带平面、空闲休眠）；近观面板适配视口 + 长内容折叠
+- **v4**：展厅无缝衔接；总览大厅；分厅主题配色
+- **v3**：纵深滚动换厅；黑白交替；拍立得组件
+- **v1–v2**：五厅十三幅作品的内容与数据模型
+
+© 杨嘉亮 · Galleon的空间

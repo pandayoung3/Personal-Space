@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>嘉亮的空间 · 欢迎来访</title>
-<meta name="description" content="嘉亮的空间——一座属于杨嘉亮的个人美术馆。从夜色中的宏伟外立面拾级而入，沿着会转弯的展线穿过序厅、履历馆、成长馆、学习馆与回声厅，十三幅作品挂在馆墙上等你走近。">
+<title>Galleon的空间 · 欢迎来访</title>
+<meta name="description" content="Galleon的空间——一座属于杨嘉亮的个人美术馆。从夜色中的宏伟外立面拾级而入，沿着会转弯的展线穿过序厅、履历馆、成长馆、学习馆与回声厅，十三幅作品挂在馆墙上等你走近。">
 <style>
 
 /* ============================================================
-   嘉亮的空间 — 滚动穿越的 3D 个人空间 V5
+   Galleon的空间 — 滚动穿越的 3D 个人美术馆 V7
    外立面入口 · 传送带走廊（高性能） · 折叠式近观
    ============================================================ */
 :root{
@@ -298,34 +298,34 @@ html[data-room="light"] #progress-bar{background:#141412}
 
 /* —— 建筑本体：山花 + 檐部铭文 + 六柱柱廊 + 大门 + 三级台阶 + 两翼 —— */
 .f-building{
-  position:relative;width:min(94vw,920px);margin:.5rem 0 .2rem;
+  position:relative;width:min(96vw,1180px);margin:.5rem 0 .2rem;
   filter:drop-shadow(0 44px 60px rgba(0,0,0,.55));
 }
 .f-pediment{
-  height:clamp(54px,8.5vh,84px);margin:0 4%;
+  height:clamp(64px,10.5vh,108px);margin:0 4%;
   clip-path:polygon(50% 0,100% 100%,0 100%);
   background:linear-gradient(to bottom,#34373e,#26282e 70%,#1d1f24);
 }
 .f-frieze{
   display:flex;align-items:center;justify-content:center;
-  height:clamp(40px,6vh,54px);margin:0 2%;
+  height:clamp(46px,7vh,66px);margin:0 2%;
   background:linear-gradient(to bottom,#3b3e46,#2a2c32 60%,#202227);
   border-top:2px solid #484b54;border-bottom:3px solid #15161a;
 }
 .f-frieze span{
-  font-size:clamp(.9rem,2vw,1.15rem);font-weight:600;color:var(--acc,#c8b27a);
+  font-size:clamp(1rem,2.4vw,1.4rem);font-weight:600;color:var(--acc,#c8b27a);
   letter-spacing:.9em;text-indent:.9em;text-shadow:0 1px 0 rgba(0,0,0,.8);
   opacity:.92;
 }
 .f-colonnade{
   position:relative;display:flex;align-items:flex-end;justify-content:space-between;
-  height:clamp(200px,30vh,300px);padding:0 clamp(14px,3%,30px);
+  height:clamp(250px,38vh,420px);padding:0 clamp(16px,3%,36px);
   background:
     radial-gradient(120% 90% at 50% 100%,rgba(236,222,184,.07),transparent 60%),
     linear-gradient(to bottom,#191b20,#101216 80%);
 }
 .f-col{
-  position:relative;width:clamp(22px,3.2vw,34px);height:94%;
+  position:relative;width:clamp(26px,3.8vw,46px);height:94%;
   background:
     linear-gradient(to right,#23252a,#4a4d55 38%,#54575f 50%,#42454c 64%,#1f2126),
     repeating-linear-gradient(to right,rgba(0,0,0,.12) 0 3px,transparent 3px 6px);
@@ -340,7 +340,7 @@ html[data-room="light"] #progress-bar{background:#141412}
   background:radial-gradient(60% 90% at 50% 100%,rgba(222,196,138,.22),transparent 72%);
 }
 .f-door{
-  position:relative;width:clamp(140px,21%,200px);height:78%;
+  position:relative;width:clamp(160px,22%,250px);height:80%;
   border:2px solid var(--acc,#c8b27a);border-bottom:none;
   border-radius:46% 46% 0 0 / 16%;
   background:linear-gradient(to bottom,#0b0c0f,#15161b);
@@ -356,7 +356,7 @@ html[data-room="light"] #progress-bar{background:#141412}
 }
 .f-stairs{display:flex;flex-direction:column;align-items:center}
 .f-stairs i{
-  display:block;height:clamp(8px,1.4vh,12px);
+  display:block;height:clamp(10px,1.8vh,16px);
   background:linear-gradient(to bottom,#33363d,#1c1e23);
   border-top:1px solid #45484f;
 }
@@ -421,7 +421,7 @@ html[data-room="light"] #progress-bar{background:#141412}
 .ov-sub{font-size:.82rem;color:#6a6a63;letter-spacing:.12em}
 .ov-gates{position:relative;height:min(54vh,440px);margin-top:1.2rem;transform-style:preserve-3d}
 .ov-gate{
-  position:absolute;left:50%;top:50%;width:188px;height:min(46vh,360px);
+  position:absolute;left:50%;top:50%;width:200px;height:min(52vh,408px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.55rem;
   background:var(--wall);border:1px solid var(--acc);
   box-shadow:0 26px 50px -18px rgba(0,0,0,.35);
@@ -430,6 +430,78 @@ html[data-room="light"] #progress-bar{background:#141412}
 .ov-gate::before{content:"";position:absolute;inset:7px;border:1px solid var(--acc);opacity:.4;pointer-events:none}
 .ov-gate:hover,.ov-gate:focus-visible{border-color:var(--acc);box-shadow:0 34px 64px -16px rgba(0,0,0,.5),0 0 0 1px var(--acc)}
 .ov-gate .g-no{font-size:.66rem;letter-spacing:.4em;text-indent:.4em;color:var(--acc)}
+
+/* —— 五厅主题画面：每张门卡是一个微缩展厅 —— */
+.ov-gate .g-art{
+  position:relative;display:block;width:80%;height:92px;margin:.1rem auto 0;
+  border:1px solid var(--acc);overflow:hidden;
+}
+/* 序厅：拱门与暖光的门廊 */
+.ga-entry{background:linear-gradient(to bottom,#f1eee6 0 74%,#d9d5cb 74%)}
+.ga-entry::before{
+  content:"";position:absolute;left:50%;bottom:26%;transform:translateX(-50%);
+  width:34%;height:58%;border-radius:50% 50% 0 0/34%;
+  background:linear-gradient(to bottom,#23211c,#383228);
+  box-shadow:0 0 16px rgba(138,122,85,.55),inset 0 -12px 14px -6px rgba(236,222,184,.5);
+}
+.ga-entry::after{
+  content:"";position:absolute;left:18%;right:18%;bottom:26%;height:2px;background:#8a7a55;opacity:.5;
+}
+/* 履历馆：一页文档与一枚印章 */
+.ga-resume{background:#e8ebef}
+.ga-resume::before{
+  content:"";position:absolute;inset:14% 18%;background:#f8f9fb;
+  box-shadow:0 4px 10px rgba(63,90,120,.25);
+  background-image:
+    linear-gradient(#3f5a78 2px,transparent 2px),
+    linear-gradient(rgba(63,90,120,.5) 1px,transparent 1px);
+  background-size:46% 26%,88% 13%;
+  background-position:6% 18%,6% 52%;
+  background-repeat:no-repeat,repeat-y;
+}
+.ga-resume::after{
+  content:"";position:absolute;right:24%;bottom:22%;width:13px;height:13px;border-radius:50%;
+  background:#b3552e;box-shadow:0 0 0 2px rgba(179,85,46,.35);
+}
+/* 成长馆：年轮与地平线上的暖阳 */
+.ga-growth{
+  background:
+    repeating-radial-gradient(circle at 50% 108%,rgba(216,162,99,.4) 0 1px,transparent 1px 10px),
+    linear-gradient(to top,#241c14,#16110c);
+}
+.ga-growth::before{
+  content:"";position:absolute;left:50%;bottom:18%;transform:translateX(-50%);
+  width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(closest-side,#f2d6a0,#d8a263 65%,transparent 70%);
+  filter:blur(.5px);box-shadow:0 0 22px 6px rgba(216,162,99,.35);
+}
+.ga-growth::after{
+  content:"";position:absolute;left:8%;right:8%;bottom:24%;height:1px;background:rgba(242,214,160,.7);
+}
+/* 学习馆：小型书籍展馆——两层书架 */
+.ga-learning{background:linear-gradient(to bottom,#f4f3ea,#e9e7d8)}
+.ga-learning::before,.ga-learning::after{
+  content:"";position:absolute;left:10%;right:10%;height:32%;
+  border-bottom:4px solid #5d4128;
+  background:repeating-linear-gradient(90deg,
+    #33705d 0 9%,#3a2c1c 9% 11%,#a8754a 11% 22%,#3a2c1c 22% 24%,
+    #43596b 24% 36%,#3a2c1c 36% 38%,#b3552e 38% 47%,#3a2c1c 47% 49%,
+    #9c8a5c 49% 62%,#3a2c1c 62% 64%,#2e5247 64% 76%,#3a2c1c 76% 78%,
+    #7d5a3a 78% 92%,#3a2c1c 92% 94%,#e9e7d8 94% 100%);
+}
+.ga-learning::before{top:10%}
+.ga-learning::after{bottom:10%;background-position:14px 0}
+/* 回声厅：黑暗中的一圈圈回响 */
+.ga-echo{
+  background:
+    repeating-radial-gradient(circle at 50% 50%,rgba(154,160,192,.45) 0 1px,transparent 1px 12px),
+    #0a0a0e;
+}
+.ga-echo::before{
+  content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:7px;height:7px;border-radius:50%;background:#9aa0c0;
+  box-shadow:0 0 14px 3px rgba(154,160,192,.6);
+}
 .ov-gate .g-name{font-size:1.35rem;letter-spacing:.42em;text-indent:.42em;font-weight:600}
 .ov-gate .g-theme{font-size:.7rem;letter-spacing:.14em;opacity:.75;padding:0 .8rem;line-height:1.6}
 .ov-gate .g-count{font-size:.64rem;letter-spacing:.3em;text-indent:.3em;opacity:.6}
@@ -447,17 +519,11 @@ html[data-room="light"] #progress-bar{background:#141412}
 /* ============================================================
    门厅：收窄到走廊内，避免与墙体穿插
    ============================================================ */
-.exhibit-gate{width:min(92vw,1180px)}
-.gatewrap{position:relative;height:min(76vh,680px);display:grid;place-items:center}
-.gate-wing{
-  position:absolute;top:6%;bottom:6%;width:calc(50% - min(27vw,300px));
-  background:var(--wall);opacity:.97;
-  box-shadow:0 30px 60px -20px rgba(0,0,0,.4);
-}
-.gate-wing.wl{left:0;border-right:2px solid var(--acc)}
-.gate-wing.wr{right:0;border-left:2px solid var(--acc)}
+.exhibit-gate{width:min(86vw,760px)}
+.gatewrap{position:relative;height:min(72vh,640px);display:grid;place-items:center}
 .gate-frame{
-  position:relative;width:min(54vw,600px);height:88%;
+  position:relative;width:min(64vw,580px);height:92%;
+  box-shadow:0 40px 80px -28px rgba(0,0,0,.55);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;
   border:2px solid var(--acc);outline:1px solid var(--acc);outline-offset:12px;
   background:var(--wall);text-align:center;
@@ -611,7 +677,6 @@ html[data-room="light"] .scroll-cue{color:#141412}
   .ov-gate .g-theme{padding:0;width:100%;order:5}
   .ov-gate .g-enter{margin-top:0;margin-left:auto}
   .gate-frame .g-name{letter-spacing:.3em;text-indent:.3em}
-  .gate-wing{display:none}
   .gate-frame{width:min(88vw,640px)}
   .closeup-panel{max-height:94vh}
   .closeup-art{height:clamp(110px,18vh,170px)}
@@ -647,7 +712,6 @@ html.reduced-motion .exhibit-facade{background:#101216!important}
 html.reduced-motion .exhibit-work .panel,html.reduced-motion .exhibit-echo .panel{opacity:1;transform:none}
 html.reduced-motion .painting .hint{opacity:1}
 html.reduced-motion .gatewrap{height:auto;padding:3rem 0}
-html.reduced-motion .gate-wing{display:none}
 html.reduced-motion .gate-frame{width:min(88vw,640px);height:auto;padding:2.4rem 1rem}
 html.reduced-motion .ovwrap{transform:none}
 html.reduced-motion .ov-gates{height:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem;transform:none}
@@ -662,6 +726,7 @@ html.reduced-motion .closeup.is-open{animation:none}
 }
 
 
+
 </style>
 </head>
 <body>
@@ -670,7 +735,7 @@ html.reduced-motion .closeup.is-open{animation:none}
 
 <noscript>
 <main class="fallback" id="main">
-  <h1>嘉亮的空间 · 杨嘉亮</h1>
+  <h1>Galleon的空间 · 杨嘉亮</h1>
   <p class="note">把履历挂上墙，把心事调成光。这不是一份简历列表，而是一条了解我的路径。您的浏览器未启用 JavaScript，以下是全部展厅内容的顺序阅读版。</p>
 
   <h2>一 · 履历馆 — 我做过什么</h2>
@@ -715,14 +780,14 @@ html.reduced-motion .closeup.is-open{animation:none}
     <li>邮箱：<a href="mailto:jialiangyang261@gmail.com">jialiangyang261@gmail.com</a></li>
     <li>社交账号与简历下载：占位，待补充。</li>
   </ul>
-  <p class="note">© 杨嘉亮 · 嘉亮的空间</p>
+  <p class="note">© 杨嘉亮 · Galleon的空间</p>
 </main>
 </noscript>
 
 <!-- ============ 个人空间应用（由 JavaScript 渲染） ============ -->
 <div id="app">
   <header class="topbar">
-    <span class="brand">嘉亮的空间<i>JIALIANG'S SPACE</i></span>
+    <span class="brand">Galleon的空间<i>GALLEON'S SPACE</i></span>
     <nav class="halls" aria-label="空间导航" id="halls-nav">
       <button data-hall="entry"    aria-current="true">序厅</button>
       <button data-hall="resume"   aria-current="false">履历馆</button>
@@ -1023,8 +1088,8 @@ const ECHO = {
 
   const FACADE = {
     kicker: 'PERSONAL MUSEUM',
-    name: '嘉亮的空间',
-    sub: "JIALIANG'S SPACE · 一个人的常设展",
+    name: 'Galleon的空间',
+    sub: "GALLEON'S SPACE · 一个人的常设展",
     note: '常年开放 · 免票 · 欢迎来访'
   };
 
@@ -1071,8 +1136,10 @@ const ECHO = {
     (segDirs[Math.max(0, i - 1)] + segDirs[Math.min(TOTAL - 2, i)]) / 2);
   const CORNERS = [];
   for (let i = 1; i < TOTAL - 1; i++) if (segDirs[i - 1] !== segDirs[i]) CORNERS.push(i);
-  /* 作品一律挂在行进方向右侧的墙上 */
-  const sideOf = i => (SCENES[i].type === 'work' ? 1 : 0);
+  /* 作品逐馆左右交替：履历馆右墙 → 成长馆左墙 → 学习馆右墙，
+     避免视线一直朝同一侧重复扫视 */
+  const HALLSIDE = { resume: 1, growth: -1, learning: 1 };
+  const sideOf = i => (SCENES[i].type === 'work' ? (HALLSIDE[SCENES[i].gallery] || 1) : 0);
 
   /* 随视口变化的几何量（relayout 时重算） */
   const geo = { CW: 640, LATP: 520, F: 520, AIM: 45, TILT: 23, floorY: 320, ceilY: 300, wallH: 1000, camYaw: [], anchor: [] };
@@ -1090,13 +1157,14 @@ const ECHO = {
     geo.anchor = SCENES.map((sc, i) => {
       const ly = LEGYAW[i], p0 = POS[i];
       if (sc.type === 'work') {
+        const s = sideOf(i);
         return {
-          x: p0.x + hX(ly) * geo.F + rX(ly) * geo.LATP,
-          z: p0.z + hZ(ly) * geo.F + rZ(ly) * geo.LATP,
-          rot: ly - 90 + geo.TILT
+          x: p0.x + hX(ly) * geo.F + rX(ly) * s * geo.LATP,
+          z: p0.z + hZ(ly) * geo.F + rZ(ly) * s * geo.LATP,
+          rot: ly - s * 90 + s * geo.TILT
         };
       }
-      const v = sc.type === 'facade' ? 990 : VIEW;
+      const v = sc.type === 'facade' ? 880 : VIEW;
       const cy = geo.camYaw[i];
       return { x: p0.x + hX(cy) * v, z: p0.z + hZ(cy) * v, rot: cy };
     });
@@ -1278,6 +1346,7 @@ const ECHO = {
             ' style="--acc:' + r.accent + ';--wall:' + r.wall + ';transform:' + tf + '"' +
             ' aria-label="进入' + esc(h.name) + '：' + esc(h.theme) + '">' +
             '<span class="g-no">0' + (k + 1) + '</span>' +
+            '<span class="g-art ga-' + h.id + '" aria-hidden="true"></span>' +
             '<span class="g-name">' + esc(h.name) + '</span>' +
             '<span class="g-theme">' + esc(h.theme) + '</span>' +
             '<span class="g-count">' + esc(cnt) + '</span>' +
@@ -1296,8 +1365,6 @@ const ECHO = {
         sec.setAttribute('aria-label', '步入' + h.name);
         sec.innerHTML =
           '<div class="gatewrap">' +
-          '<span class="gate-wing wl" aria-hidden="true"></span>' +
-          '<span class="gate-wing wr" aria-hidden="true"></span>' +
           '<div class="gate-frame">' +
           '<p class="g-kicker">第 ' + no + ' 空间</p>' +
           '<h2 class="g-name">' + esc(h.name) + '</h2>' +
@@ -1355,7 +1422,7 @@ const ECHO = {
 
       world.appendChild(sec);
       /* 前方可见的路程（按场景数）：门厅远远可见，作品走近才清晰 */
-      const ahead = sc.type === 'gate' ? 2.1 :
+      const ahead = sc.type === 'gate' ? 1.55 :
         (sc.type === 'overview' || sc.type === 'hero' ? 1.5 : 1.05);
       items.push({ el: sec, type: sc.type, i, ahead, lastOp: -1, lastVis: null, lastNear: null });
     });
@@ -1406,7 +1473,9 @@ const ECHO = {
     const a = ROOMS[galOfScene(fi)].bg, b = ROOMS[galOfScene(fi + 1)].bg;
     const bg = 'rgb(' + lerpC(a[0], b[0], s) + ',' + lerpC(a[1], b[1], s) + ',' + lerpC(a[2], b[2], s) + ')';
     if (bg !== lastBg) { viewport.style.backgroundColor = bg; lastBg = bg; }
-    const mode = modeOf(galOfScene(near));
+    const gal = galOfScene(near);
+    if (gal !== sndGal) { sndGal = gal; tuneAmbience(gal); }
+    const mode = modeOf(gal);
     if (mode !== lastMode) { document.documentElement.setAttribute('data-room', mode); lastMode = mode; }
 
     /* 展位：按路程距离增量写入 */
@@ -1605,13 +1674,33 @@ const ECHO = {
   }
 
   /* ============================================================
-     程序化环境声
+     程序化环境声：每个展厅一种声场，切厅时平滑渐变
+     —— drone 音高、噪声滤波、点缀音都按主题配置；
+        过渡用 setTargetAtTime（约 1.5s 时间常数），自然不突兀。
      ============================================================ */
-  let audioCtx = null, audioNodes = null;
+  const SND = {
+    /* drone: 双正弦音高 | dlev: drone 音量 | nf/nq: 噪声滤波 |
+       spark: 点缀音 { notes 音高集, every 间隔秒, decay 衰减, vol, send 回声量 } */
+    facade:   { drone: [54, 81.5],   dlev: .055, nf: 210, nq: .3, spark: null }, /* 馆外夜风 */
+    entry:    { drone: [108, 162.2], dlev: .05,  nf: 330, nq: .4,
+                spark: { notes: [880, 987.8, 1174.7], every: [6, 11], decay: 2.4, vol: .05, send: .25 } }, /* 序厅风铃 */
+    resume:   { drone: [96, 144.2],  dlev: .045, nf: 300, nq: .5,
+                spark: { notes: [1318.5, 1174.7], every: [3.5, 7], decay: .5, vol: .025, send: .08 } },    /* 履历馆笔尖轻响 */
+    growth:   { drone: [82, 123.2],  dlev: .062, nf: 250, nq: .4,
+                spark: { notes: [659.3, 587.3, 523.3], every: [7, 12], decay: 2.8, vol: .055, send: .3 } }, /* 成长馆暖钟 */
+    learning: { drone: [121, 181.6], dlev: .045, nf: 440, nq: .5,
+                spark: { notes: [1046.5, 1318.5, 1568], every: [5, 9], decay: 1.5, vol: .04, send: .18 } }, /* 学习馆翻页轻音 */
+    echo:     { drone: [54, 81.5],   dlev: .07,  nf: 170, nq: .6,
+                spark: { notes: [523.3, 659.3], every: [8, 13], decay: 4, vol: .065, send: .55 } }          /* 回声厅远钟回响 */
+  };
+  let audioCtx = null, audioNodes = null, sparkTimer = null, sndGal = 'facade';
+  const rand = (a, b) => a + Math.random() * (b - a);
+
   function buildAmbience() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const master = audioCtx.createGain();
     master.gain.value = 0; master.connect(audioCtx.destination);
+    /* 棕噪声底 */
     const len = audioCtx.sampleRate * 4;
     const buf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
     const data = buf.getChannelData(0);
@@ -1624,31 +1713,88 @@ const ECHO = {
     const noise = audioCtx.createBufferSource();
     noise.buffer = buf; noise.loop = true;
     const lp = audioCtx.createBiquadFilter();
-    lp.type = 'lowpass'; lp.frequency.value = 320; lp.Q.value = .4;
+    lp.type = 'lowpass'; lp.frequency.value = 210; lp.Q.value = .4;
     const nGain = audioCtx.createGain(); nGain.gain.value = .5;
     noise.connect(lp); lp.connect(nGain); nGain.connect(master);
-    const droneGain = audioCtx.createGain(); droneGain.gain.value = .05;
-    [108, 162.2].forEach(fq => {
+    /* 双正弦 drone（音高随展厅渐变） */
+    const droneGain = audioCtx.createGain(); droneGain.gain.value = .055;
+    const oscs = [54, 81.5].map(fq => {
       const o = audioCtx.createOscillator();
       o.type = 'sine'; o.frequency.value = fq;
       const g = audioCtx.createGain(); g.gain.value = .5;
       o.connect(g); g.connect(droneGain); o.start();
+      return o;
     });
     droneGain.connect(master);
+    /* 噪声呼吸感 LFO */
     const lfo = audioCtx.createOscillator(); lfo.frequency.value = .05;
     const lfoGain = audioCtx.createGain(); lfoGain.gain.value = .12;
     lfo.connect(lfoGain); lfoGain.connect(nGain.gain); lfo.start();
     noise.start();
-    audioNodes = { master };
+    /* 回声总线：点缀音按 send 量送入，回声厅尤其明显 */
+    const delay = audioCtx.createDelay(1.2); delay.delayTime.value = .34;
+    const fb = audioCtx.createGain(); fb.gain.value = .38;
+    const dampen = audioCtx.createBiquadFilter();
+    dampen.type = 'lowpass'; dampen.frequency.value = 1500;
+    delay.connect(dampen); dampen.connect(fb); fb.connect(delay);
+    delay.connect(master);
+    audioNodes = { master, lp, droneGain, oscs, echoBus: delay };
   }
+
+  /* 切厅：声场参数平滑渐变到目标主题 */
+  function tuneAmbience(gal) {
+    if (!audioCtx || !audioNodes) return;
+    const cfg = SND[gal] || SND.entry;
+    const t = audioCtx.currentTime;
+    audioNodes.oscs[0].frequency.setTargetAtTime(cfg.drone[0], t, 1.6);
+    audioNodes.oscs[1].frequency.setTargetAtTime(cfg.drone[1], t, 1.6);
+    audioNodes.droneGain.gain.setTargetAtTime(cfg.dlev, t, 1.4);
+    audioNodes.lp.frequency.setTargetAtTime(cfg.nf, t, 1.2);
+    audioNodes.lp.Q.setTargetAtTime(cfg.nq, t, 1.2);
+  }
+
+  /* 点缀音：按当前展厅的音色与节奏轻轻敲一下 */
+  function ping(sp) {
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = sp.notes[Math.floor(Math.random() * sp.notes.length)] * rand(.997, 1.003);
+    const g = audioCtx.createGain();
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.linearRampToValueAtTime(sp.vol, t + .025);
+    g.gain.exponentialRampToValueAtTime(.0001, t + sp.decay);
+    o.connect(g); g.connect(audioNodes.master);
+    if (sp.send > 0) {
+      const s = audioCtx.createGain(); s.gain.value = sp.send;
+      g.connect(s); s.connect(audioNodes.echoBus);
+    }
+    o.start(t); o.stop(t + sp.decay + .1);
+  }
+  function scheduleSpark() {
+    clearTimeout(sparkTimer);
+    if (!state.soundOn) return;
+    const sp = (SND[sndGal] || {}).spark;
+    const wait = sp ? rand(sp.every[0], sp.every[1]) : 6;
+    sparkTimer = setTimeout(() => {
+      if (state.soundOn) {
+        const cur = (SND[sndGal] || {}).spark;
+        if (cur && audioCtx) ping(cur);
+      }
+      scheduleSpark();
+    }, wait * 1000);
+  }
+
   function setSound(on, save) {
     state.soundOn = on;
     if (on) {
       if (!audioCtx) buildAmbience();
       if (audioCtx.state === 'suspended') audioCtx.resume();
+      tuneAmbience(sndGal);
       audioNodes.master.gain.setTargetAtTime(.22, audioCtx.currentTime, 1.2);
+      scheduleSpark();
     } else if (audioNodes) {
       audioNodes.master.gain.setTargetAtTime(0, audioCtx.currentTime, .4);
+      clearTimeout(sparkTimer);
     }
     btnSound.textContent = '声 · ' + (on ? '开' : '关');
     btnSound.setAttribute('aria-pressed', String(on));
