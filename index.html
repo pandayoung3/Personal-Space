@@ -828,8 +828,8 @@ html.reduced-motion .closeup.is-open{animation:none}
 const HALLS = [
   { id: 'entry',    name: '序厅',   theme: '我是谁' },
   { id: 'resume',   name: '履历馆', theme: '我做过什么' },
-  { id: 'growth',   name: '成长馆', theme: '我如何成为现在的我' },
-  { id: 'learning', name: '学习馆', theme: '我的精神食粮与知识系统' },
+  { id: 'growth',   name: '成长馆', theme: '我的成长路径' },
+  { id: 'learning', name: '学习馆', theme: '我的精神食粮与知识库' },
   { id: 'echo',     name: '回声厅', theme: '联系、留言与离场' }
 ];
 
@@ -851,13 +851,13 @@ const WORKS = [
   },
   {
     id: 'resume-timeline', gallery: 'resume',
-    title: '十年走廊', subtitle: '工作与实践时间线',
+    title: '工作走廊', subtitle: '工作与实践时间线',
     year: '2016–至今', medium: '时间线装置、灯箱',
     cover: 'cv-resume-timeline',
     excerpt: '每一段经历都是走廊里的一扇门，推开之后才知道里面的光。',
     body: [
-      '一条贯穿画面的金色走廊，把实习、第一份全职工作与几次关键的岗位变化串在同一条时间线上。重要的不是头衔的更替，而是在每一段里真正学到的东西：第一次独立负责一个模块、第一次带人、第一次为决策承担后果。',
-      '（占位内容：此处替换为真实的公司、职位、时间区间与职责描述。）'
+      '一条贯穿画面的金色走廊，把工作经历与几次关键的职业转折串在同一条时间线上。告诫自己永远记得每个第一次，脚踏实地，大胆执行。',
+      ' 目前：帆软软件——项目实施工程师 负责产品工程部署到系统运维整个生命周期'
     ],
     images: ['照片占位 · 工位与白板'],
     highlights: ['实习与早期实践（占位）', '正式工作经历，按时间排列（占位）', '角色转变与责任升级的节点（占位）'],
@@ -865,8 +865,8 @@ const WORKS = [
   },
   {
     id: 'resume-projects', gallery: 'resume',
-    title: '手作之物', subtitle: '代表项目与工作产出',
-    year: '近五年', medium: '界面截图、代码、文档',
+    title: '手作之物', subtitle: '项目内容与工作产出',
+    year: '近几年', medium: '界面截图、代码、文档',
     cover: 'cv-resume-projects',
     excerpt: '作品是最诚实的简历。',
     body: [
@@ -875,7 +875,7 @@ const WORKS = [
     ],
     images: ['界面截图占位 · 项目一', '界面截图占位 · 项目二', '文档占位 · 设计稿'],
     highlights: ['项目一：背景 / 角色 / 产出（占位）', '项目二：背景 / 角色 / 产出（占位)', '项目三：背景 / 角色 / 产出（占位）'],
-    links: [{ label: '代码仓库（占位）', href: 'https://github.com/' }]
+    links: [{ label: '代码仓库（占位）', href: 'https://github.com/pandayoung3/' }]
   },
   {
     id: 'resume-achievements', gallery: 'resume',
@@ -884,7 +884,7 @@ const WORKS = [
     cover: 'cv-resume-achievements',
     excerpt: '光可以被感受，也可以被度量。',
     body: [
-      '从画面中心放射出的光束，每一道都对应一个可验证的事实：一个奖项、一项认证、一组关键业务数据。职业可信度不靠形容词堆砌，而靠这些可以被核对的光。',
+      '从画面中心放射出的光束，每一道都对应一个可验证的事实：每次交付的成果、每个证书、一组关键业务数据。个人能力不靠形容词堆砌，而靠这些可以被核对的光。',
       '（占位内容：此处替换为真实的奖项、认证、量化业绩与能力清单。）'
     ],
     images: ['照片占位 · 获奖证书'],
@@ -896,7 +896,7 @@ const WORKS = [
   {
     id: 'growth-childhood', gallery: 'growth',
     title: '纸飞机', subtitle: '童年或早期记忆',
-    year: '上世纪末', medium: '油彩、蜡笔、回忆',
+    year: '世纪初', medium: '油彩、蜡笔、回忆',
     cover: 'cv-growth-childhood',
     epigraph: '好奇心最初的样子，是把东西拆开，却装不回去。',
     excerpt: '所有后来的远行，都始于一只掷出窗外的纸飞机。',
@@ -1034,21 +1034,21 @@ const WORKS = [
 
 const HERO = {
   id: 'hero',
-  welcome: '你好，欢迎你来。',
-  manifesto: '这里不是一份简历，而是我的个人空间——往下慢慢走，灯会一盏一盏亮起来，我把我的故事一段一段讲给你听。',
-  note: '五个空间 · 十三幅作品 · 大约五分钟',
+  welcome: '我是杨嘉亮，欢迎你。',
+  manifesto: '如果人生是一场展览，那我希望留下些什么。',
+  note: '成长 · 经历 · 思考',
   photo: '照片占位 · 这是我',
-  photoCap: '某个晴天的我（占位）',
+  photoCap: '真实的我',
   chips: [
-    { k: '坐标', v: '城市 · 占位' },
-    { k: '身份', v: '职业身份 · 占位' },
-    { k: '最近', v: '正在做的事 · 占位' }
+    { k: '坐标', v: '城市 · 甘肃平凉' },
+    { k: '身份', v: '职业身份 · 我选择不对身份做定义' },
+    { k: '最近', v: '正在做的事 · 努力赚钱买Token' }
   ]
 };
 
 const ECHO = {
   id: 'echo',
-  title: '未完成', subtitle: '未来仍在继续',
+  title: '未完待续', subtitle: '未来仍在继续',
   year: '∞', medium: '画布、留白、时间',
   email: 'jialiangyang261@gmail.com',
   photo: '照片占位 · 感谢来访',
