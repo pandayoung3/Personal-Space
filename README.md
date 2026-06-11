@@ -30,9 +30,17 @@ git checkout main -- index.html
 
 ## 发布
 
-仓库地址：<https://github.com/pandayoung3/Personal-Space>
+- 仓库地址：<https://github.com/pandayoung3/Personal-Space>
+- **线上地址：<https://pandayoung3.github.io/Personal-Space/>**（GitHub Pages，部署自 `gh-pages` 分支）
 
-后续要绑定域名时，推荐用 **GitHub Pages**：仓库 Settings → Pages → Source 选 `main` 分支根目录，保存后即可获得 `https://pandayoung3.github.io/Personal-Space/` 地址；再在 Pages 设置里填入自定义域名（并在域名服务商处加一条 CNAME 记录指向 `pandayoung3.github.io`）即可。
+发布流程：`main` 是开发主干，每个版本提交到 `main` 后，把同一提交推到 `gh-pages` 即完成上线：
+
+```bash
+git push origin main          # 提交版本
+git push origin main:gh-pages # 发布上线（约 1 分钟生效）
+```
+
+要绑定自定义域名：仓库 Settings → Pages → Custom domain 填入你的域名，并在域名服务商处加一条 CNAME 记录指向 `pandayoung3.github.io`。
 
 ## 版本历史
 
